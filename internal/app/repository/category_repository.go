@@ -46,6 +46,21 @@ func (r *categoryRepository) GetSingleCategory(id uint) (*entity.Category, error
 }
 
 func (r *categoryRepository) CreateCategory(category *entity.Category) error {
+	if category.ParentCategoryID != 0 {
+
+		parentCategory, err := r.GetSingleCategory(category.ParentCategoryID)
+		if err != nil {
+			return err
+		}
+		if parentCategory == nil {
+			return errors.New("Parent category does not exist")
+		}
+
+		category.Level = parentCategory.Level + 1
+	}
+	if category.ParentCategoryID == 0 {
+		category.Level = 1
+	}
 	if err := r.db.Create(&category).Error; err != nil {
 		return err
 	}
@@ -59,6 +74,19 @@ func (r *categoryRepository) UpdateCategory(id uint, category *entity.Category) 
 		if err == gorm.ErrRecordNotFound {
 			errors.New("Record not found")
 		}
+	}
+
+	if eCategory.ParentCategoryID != 0 {
+
+		parentCategory, err := r.GetSingleCategory(category.ParentCategoryID)
+		if err != nil {
+			return err
+		}
+		if parentCategory == nil {
+			return errors.New("Parent category does not exist")
+		}
+
+		eCategory.Level = parentCategory.Level + 1
 	}
 
 	eCategory.ParentCategoryID = category.ParentCategoryID

@@ -18,5 +18,15 @@ func Init() *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	err = db.AutoMigrate(&entity.Image{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.AutoMigrate(&entity.Product{})
+	if err != nil {
+		log.Fatal(err)
+	}
 	return db
 }

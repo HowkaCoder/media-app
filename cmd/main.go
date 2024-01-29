@@ -18,8 +18,11 @@ func main() {
 	categoryRepository := repository.NewCategoryRepository(db)
 	categoryService := service.NewCategoryService()
 	categoryUsecase := usecase.NewCategoryUseCase(categoryRepository, categoryService)
-
 	categoryHandler := handler.NewCategoryHandler(categoryUsecase)
+
+	productRepository := repository.NewProductRepository(db)
+	productUsecase := usecase.NewProductUseCase(productRepository)
+	productHandler := handler.NewProductHandler(productUsecase)
 
 	app := fiber.New()
 	api := app.Group("/api")
@@ -28,7 +31,8 @@ func main() {
 	api.Patch("/categories/:id", categoryHandler.UpdateCategory)
 	api.Get("/categories/:id", categoryHandler.GetCategoryByID)
 	api.Delete("/categories/:id", categoryHandler.DeleteCategory)
-	log.Println("Server is runnig on :8001")
-	log.Fatal(app.Listen(":8001"))
+
+	log.Println("Server is runnig on :8081")
+	log.Fatal(app.Listen(":8081"))
 
 }

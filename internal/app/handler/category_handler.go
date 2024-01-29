@@ -19,10 +19,22 @@ func NewCategoryHandler(categoryUsecase usecase.CategoryUseCase) *categoryHandle
 }
 
 func (h *categoryHandler) GetAllCategories(c *fiber.Ctx) error {
-	categories, err := h.categoryUseCase.GetAllCategories()
+	limit, _ := strconv.Atoi(c.Query("limit"))
+
+	offset, _ := strconv.Atoi(c.Query("offset"))
+
+	var categories []entity.Category
+	var err error
+	if limit > 0 || offset > 0 {
+		categories, err = h.categoryUseCase.GetCategoriesWithPagination(limit, offset)
+	} else {
+		categories, err = h.categoryUseCase.GetAllCategories()
+	}
+
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
+
 	return c.JSON(categories)
 }
 

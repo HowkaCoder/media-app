@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple File Upload</title>
+</head>
+<body>
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="fileInput" name="images[]" multiple>
+    <button type="submit">Upload</button>
+</form>
+<div id="status"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

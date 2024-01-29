@@ -2,10 +2,8 @@ package repository
 
 import (
 	"errors"
-	"media-app/internal/app/entity"
-	"strconv"
-
 	"gorm.io/gorm"
+	"media-app/internal/app/entity"
 )
 
 type CategoryRepository interface {
@@ -14,6 +12,7 @@ type CategoryRepository interface {
 	CreateCategory(category *entity.Category) error
 	UpdateCategory(id uint, category *entity.Category) error
 	DeleteCategory(id uint) error
+	GetCategoriesWithPagination(limit, offset int) ([]entity.Category, error)
 }
 
 type categoryRepository struct {
@@ -35,19 +34,23 @@ func (r *categoryRepository) GetAllCategories() ([]entity.Category, error) {
 }
 
 func (r *categoryRepository) GetSingleCategory(id uint) (*entity.Category, error) {
+
 	var category *entity.Category
-	if err := r.db.Preload("ParentCategory").First(&category, id).Error; err != nil {
+
+	if err := r.db.Preload("ParentCategory").Preload("ChildrenCategories").First(&category, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
 		return nil, err
 	}
+
 	return category, nil
 }
 
 func (r *categoryRepository) CreateCategory(category *entity.Category) error {
-	if category.ParentCategoryID != 0 {
 
+	// Проверка на наличие родительсокй категории
+	if category.ParentCategoryID != 0 {
 		parentCategory, err := r.GetSingleCategory(category.ParentCategoryID)
 		if err != nil {
 			return err
@@ -58,9 +61,11 @@ func (r *categoryRepository) CreateCategory(category *entity.Category) error {
 
 		category.Level = parentCategory.Level + 1
 	}
+
 	if category.ParentCategoryID == 0 {
 		category.Level = 1
 	}
+
 	if err := r.db.Create(&category).Error; err != nil {
 		return err
 	}
@@ -69,6 +74,7 @@ func (r *categoryRepository) CreateCategory(category *entity.Category) error {
 
 func (r *categoryRepository) UpdateCategory(id uint, category *entity.Category) error {
 
+	// поиск обновляемой категории
 	var eCategory *entity.Category
 	if err := r.db.First(&eCategory, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -76,43 +82,43 @@ func (r *categoryRepository) UpdateCategory(id uint, category *entity.Category) 
 		}
 	}
 
-	if eCategory.ParentCategoryID != 0 {
-
-		parentCategory, err := r.GetSingleCategory(category.ParentCategoryID)
-		if err != nil {
-			return err
-		}
-		if parentCategory == nil {
-			return errors.New("Parent category does not exist")
-		}
-
-		eCategory.Level = parentCategory.Level + 1
+	// проверка , функция динамичности
+	if category.NameEN != "" {
+		eCategory.NameEN = category.NameEN
 	}
-
-	eCategory.ParentCategoryID = category.ParentCategoryID
-	eCategory.NameEN = category.NameEN
-	eCategory.NameKK = category.NameKK
-	eCategory.NameRU = category.NameRU
-	eCategory.NameUZ = category.NameUZ
+	if category.NameKK != "" {
+		eCategory.NameKK = category.NameKK
+	}
+	if category.NameRU != "" {
+		eCategory.NameRU = category.NameRU
+	}
+	if category.NameUZ != "" {
+		eCategory.NameUZ = category.NameUZ
+	}
+	if category.ParentCategoryID != 0 {
+		eCategory.ParentCategoryID = category.ParentCategoryID
+	}
 
 	return r.db.Save(&eCategory).Error
 }
 
 func (r *categoryRepository) DeleteCategory(id uint) error {
+
+	// поиск удаляемой категории
 	var category *entity.Category
 	if err := r.db.First(&category, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			errors.New("Record not found")
 		}
 	}
+
 	return r.db.Delete(&category).Error
 }
 
-func uintToString(value uint) string {
-	return strconv.FormatUint(uint64(value), 10)
-}
-
-func stringToUint(value string) uint {
-	result, _ := strconv.ParseUint(value, 10, 64)
-	return uint(result)
+func (r *categoryRepository) GetCategoriesWithPagination(limit, offset int) ([]entity.Category, error) {
+	var categories []entity.Category
+	if err := r.db.Limit(limit).Offset(offset).Find(&categories).Error; err != nil {
+		return nil, err
+	}
+	return categories, nil
 }

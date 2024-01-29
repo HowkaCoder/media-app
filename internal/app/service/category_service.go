@@ -33,21 +33,11 @@ func (s *categoryService) ValidateCategory(category *entity.Category) error {
 
 	return nil
 }
+
 func (s *categoryService) ValidateCategoryByUpdate(category *entity.Category, id uint) error {
 	if id == category.ParentCategoryID {
-		return errors.New("Error!")
+		return errors.New("Parent Category iD cannot be as a category ID !!!")
 	}
-	if category.NameUZ == "" {
-		return errors.New("NameUZ cannot be empty")
-	}
-	if category.NameKK == "" {
-		return errors.New("NameKK cannot be empty")
-	}
-	if category.NameRU == "" {
-		return errors.New("NameRU cannot be empty")
-	}
-	if category.NameEN == "" {
-		return errors.New("NameEN cannot be empty")
-	}
+
 	return nil
 }

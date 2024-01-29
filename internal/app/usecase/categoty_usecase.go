@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"errors"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/repository"
 	"media-app/internal/app/service"
@@ -13,6 +12,7 @@ type CategoryUseCase interface {
 	CreateCategory(category *entity.Category) error
 	UpdateCategory(category *entity.Category, id uint) error
 	DeleteCategory(id uint) error
+	GetCategoriesWithPagination(limit, offset int) ([]entity.Category, error)
 }
 
 type categoryUseCase struct {
@@ -39,16 +39,6 @@ func (us *categoryUseCase) CreateCategory(category *entity.Category) error {
 	if err := us.categoryService.ValidateCategory(category); err != nil {
 		return err
 	}
-	if category.ParentCategoryID != 0 {
-
-		parentCategory, err := us.categoryRepo.GetSingleCategory(category.ParentCategoryID)
-		if err != nil {
-			return err
-		}
-		if parentCategory == nil {
-			return errors.New("Parent category does not exist")
-		}
-	}
 	return us.categoryRepo.CreateCategory(category)
 }
 
@@ -61,4 +51,8 @@ func (us *categoryUseCase) UpdateCategory(category *entity.Category, id uint) er
 
 func (us *categoryUseCase) DeleteCategory(id uint) error {
 	return us.categoryRepo.DeleteCategory(id)
+}
+
+func (us *categoryUseCase) GetCategoriesWithPagination(limit, offset int) ([]entity.Category, error) {
+	return us.categoryRepo.GetCategoriesWithPagination(limit, offset)
 }

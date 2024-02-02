@@ -26,6 +26,6 @@ type Characteristic struct {
 type Image struct {
 	gorm.Model
 	ID        uint   `gorm:"primaryKey"`
-	ProductID uint   `gorm:"null"`
+	ProductID uint   `gorm:"not null"`
 	Path      string `gorm:"not null"`
 }

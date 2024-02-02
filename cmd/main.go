@@ -21,18 +21,37 @@ func main() {
 	categoryHandler := handler.NewCategoryHandler(categoryUsecase)
 
 	productRepository := repository.NewProductRepository(db)
-	productUsecase := usecase.NewProductUseCase(productRepository)
+	productService := service.NewProductService(categoryRepository)
+	productUsecase := usecase.NewProductUseCase(productRepository, productService)
 	productHandler := handler.NewProductHandler(productUsecase)
 
 	app := fiber.New()
+	app.Use(func(c *fiber.Ctx) error {
+		c.Set("Access-Control-Allow-Origin", "*")
+		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		c.Set("Access-Control-Allow-Headers", "Content-Type")
+		c.Set("Access-Control-Allow-Credentials", "true")
+		if c.Method() == "OPTIONS" {
+			return c.SendStatus(fiber.StatusOK)
+		}
+		return c.Next()
+	})
 	api := app.Group("/api")
+
 	api.Get("/categories", categoryHandler.GetAllCategories)
 	api.Post("/categories", categoryHandler.CreateCategory)
 	api.Patch("/categories/:id", categoryHandler.UpdateCategory)
 	api.Get("/categories/:id", categoryHandler.GetCategoryByID)
 	api.Delete("/categories/:id", categoryHandler.DeleteCategory)
 
-	log.Println("Server is runnig on :8081")
-	log.Fatal(app.Listen(":8081"))
+	api.Get("/products", productHandler.GetAllProducts)
+	api.Post("/products", productHandler.CreateProduct)
+	api.Patch("/products/:id", productHandler.UpdateProduct)
+	api.Get("/products/:id", productHandler.GetProductByID)
+	api.Delete("/products/:id", productHandler.DeleteProduct)
+	api.Get("/categories/:id/products", productHandler.GetProductsByCategory)
+
+	log.Println("Server is runnig on :8082")
+	log.Fatal(app.Listen(":8082"))
 
 }

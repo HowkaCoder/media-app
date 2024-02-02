@@ -1,5 +1,5 @@
 
-# E-commerce API Documentation
+# E-commerce API Documentation 
 
 URL - https://ecommerce.icedev.uz/
 
@@ -7,7 +7,7 @@ URL - https://ecommerce.icedev.uz/
 ### The documentation is not complete yet
 
 Structure of documentation
-- [Login](#login)
+- [Login](#login) 
 - [CallOrders](#call-orders)
     - [Get all call orders](#get-all-call-orders)
     - [Get a single call order](#get-a-single-call-order)
@@ -1068,7 +1068,7 @@ fetch('https://ecommerce.icedev.uz/users/')
                 }
             }
         ]
-    },
+    }, 
     /***/
     {},
     {}
@@ -1116,7 +1116,7 @@ fetch('https://ecommerce.icedev.uz/users?limit=5')
                 }
             }
         ]
-    },
+    }, 
     /***/
     {"id":5},
 ]

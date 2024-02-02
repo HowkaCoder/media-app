@@ -9,13 +9,15 @@ import (
 type ProductRepository interface {
 
 	// PRODUCT - CRUD FUNCTIONS
-
+	GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint) ([]entity.Product, error)
+	GetProductsByPriceRange(minPrice, maxPrice uint) ([]entity.Product, error)
+	GetProductsByCategoryID(id uint) ([]entity.Product, error)
 	GetAllProducts() ([]entity.Product, error)
-	//GetProductsWithPagination(limit, offset uint) ([]entity.Product, error)
-	//GetProductByID(id uint) (*entity.Product, error)
-	CreateProduct(product entity.Product) error
+	GetProductsWithPagination(limit int) ([]entity.Product, error)
+	GetProductByID(id uint) (*entity.Product, error)
+	CreateProduct(product *entity.Product) error
 	UpdateProduct(product entity.Product, id uint) error
-	//DeleteProduct(id uint) error
+	DeleteProduct(id uint) error
 
 	// IMAGE - CRUD FUNCTIONS
 
@@ -26,7 +28,7 @@ type ProductRepository interface {
 
 	// Characteristics - CRUD FUNCTIONS
 
-	CreateCharacteristic(characteristic entity.Characteristic) error
+	CreateCharacteristic(characteristic *entity.Characteristic) error
 	GetCharacteristicsByProductID(product_id uint) ([]entity.Characteristic, error)
 	DeleteCharacteristic(id uint) error
 }
@@ -75,7 +77,7 @@ func (pr *productRepository) DeleteImage(id uint) error {
 
 // CHARACTERISTICS FUNCTIONS
 
-func (pr *productRepository) CreateCharacteristic(characteristic entity.Characteristic) error {
+func (pr *productRepository) CreateCharacteristic(characteristic *entity.Characteristic) error {
 	return pr.db.Create(&characteristic).Error
 }
 
@@ -100,8 +102,8 @@ func (pr *productRepository) DeleteCharacteristic(id uint) error {
 
 // PRODUCT FUNCTIONS
 
-func (pr *productRepository) CreateProduct(product entity.Product) error {
-	return pr.db.Create(&product).Error
+func (pr *productRepository) CreateProduct(product *entity.Product) error {
+	return pr.db.Create(product).Error
 }
 
 func (pr *productRepository) UpdateProduct(product entity.Product, id uint) error {
@@ -133,7 +135,63 @@ func (pr *productRepository) UpdateProduct(product entity.Product, id uint) erro
 
 func (pr *productRepository) GetAllProducts() ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Find(&products).Error; err != nil {
+	if err := pr.db.Preload("Images").Preload("Characteristics").Preload("Category").Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+func (pr *productRepository) GetProductByID(id uint) (*entity.Product, error) {
+	var product *entity.Product
+	if err := pr.db.Preload("Category").Preload("Images").Preload("Characteristics").First(&product, id).Error; err != nil {
+		return nil, err
+	}
+
+	return product, nil
+
+}
+
+func (pr *productRepository) GetProductsWithPagination(limit int) ([]entity.Product, error) {
+	var products []entity.Product
+	if err := pr.db.Preload("Images").Preload("Characteristics").Preload("Category").Limit(limit).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+func (pr *productRepository) DeleteProduct(id uint) error {
+	var product *entity.Product
+	if err := pr.db.First(&product, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return err
+		}
+	}
+	return pr.db.Delete(&product).Error
+}
+
+func (pr *productRepository) GetProductsByCategoryID(id uint) ([]entity.Product, error) {
+	var products []entity.Product
+	if err := pr.db.Where("category_id = ?", id).Find(&products); err != nil {
+
+	}
+	return products, nil
+}
+
+func (pr *productRepository) GetProductsByPriceRange(minPrice, maxPrice uint) ([]entity.Product, error) {
+	var products []entity.Product
+	if err := pr.db.Where("price >= ? AND price <= ?", minPrice, maxPrice).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+func (pr *productRepository) GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint) ([]entity.Product, error) {
+	var products []entity.Product
+	order := "price ASC"
+	if sortOrder == "expensive" {
+		order = "price DESC"
+	}
+	if err := pr.db.Where("category_id = ?", categoryID).Order(order).Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil

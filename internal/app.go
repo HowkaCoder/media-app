@@ -9,7 +9,7 @@ import (
 )
 
 func Init() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("database/database.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("database.db"), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,6 +20,11 @@ func Init() *gorm.DB {
 	}
 
 	err = db.AutoMigrate(&entity.Image{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.AutoMigrate(&entity.Characteristic{})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -11,6 +11,7 @@ type ProductRepository interface {
 	// PRODUCT - CRUD FUNCTIONS
 	GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint) ([]entity.Product, error)
 	GetProductsByPriceRange(minPrice, maxPrice uint) ([]entity.Product, error)
+	GetProductsByCharacteristics(value, description string) ([]entity.Product, error)
 	GetProductsByCategoryID(id uint) ([]entity.Product, error)
 	GetAllProducts() ([]entity.Product, error)
 	GetProductsWithPagination(limit int) ([]entity.Product, error)
@@ -192,6 +193,18 @@ func (pr *productRepository) GetProductsSortedByPriceAndCategory(sortOrder strin
 		order = "price DESC"
 	}
 	if err := pr.db.Where("category_id = ?", categoryID).Order(order).Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+func (pr *productRepository) GetProductsByCharacteristics(value, description string) ([]entity.Product, error) {
+	var products []entity.Product
+	if err := pr.db.
+		Joins("JOIN characteristics ON products.id = characteristics.product_id").
+		Where("value = ? AND description = ?", value, description).
+		Find(&products).
+		Error; err != nil {
 		return nil, err
 	}
 	return products, nil

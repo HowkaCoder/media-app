@@ -10,6 +10,7 @@ type ProductUseCase interface {
 
 	// PRODUCT - CRUD FUNCTIONS
 	GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint) ([]entity.Product, error)
+	GetProductsByCharacteristics(value, description string) ([]entity.Product, error)
 	GetProductsByPriceRange(minPrice, maxPrice uint) ([]entity.Product, error)
 	GetProductsByCategoryID(id uint) ([]entity.Product, error)
 	GetAllProducts() ([]entity.Product, error)
@@ -79,6 +80,10 @@ func (pu *productUseCase) DeleteCharacteristic(id uint) error {
 func (pu *productUseCase) CreateProduct(product *entity.Product) error {
 	pu.productService.ValidateProduct(product)
 	return pu.productRepo.CreateProduct(product)
+}
+
+func (pu *productUseCase) GetProductsByCharacteristics(value, description string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsByCharacteristics(value, description)
 }
 
 func (pu *productUseCase) GetAllProducts() ([]entity.Product, error) {

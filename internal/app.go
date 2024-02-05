@@ -33,5 +33,20 @@ func Init() *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	err = db.AutoMigrate(&entity.Language{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.AutoMigrate(&entity.ProductTranslations{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.AutoMigrate(&entity.CharacteristicTranslation{})
+	if err != nil {
+		log.Fatal(err)
+	}
 	return db
 }

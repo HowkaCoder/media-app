@@ -5,13 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a24b08d7-bd95-44d2-a82b-f069d62d92fd" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/internal/app/entity/language_entity.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/app/entity/translations_entity.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/app/handler/language_handler.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/app/handler/translation_handler.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/app/repository/language_repository.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/app/repository/translation_repository.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/app/usecase/language_usecase.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/app/usecase/translation_usecase.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/database/database.db" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/app.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/database/database.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/entity/product_entity.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/entity/product_entity.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/handler/product_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/handler/product_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/repository/product_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/repository/product_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/usecase/product_usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/usecase/product_usecase.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

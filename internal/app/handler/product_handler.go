@@ -168,24 +168,33 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 
 	maxPrice, _ := strconv.Atoi(c.Query("max"))
 
+	value := c.Query("value")
+
+	description := c.Query("description")
+
 	var products []entity.Product
 	var err error
+
 	if limit > 0 {
 		products, err = ph.productUsecase.GetProductsWithPagination(limit)
-
-	} else {
-		if minPrice > 0 || maxPrice > 0 {
-			products, err = ph.productUsecase.GetProductsByPriceRange(uint(minPrice), uint(maxPrice))
-			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-			}
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}
-		products, err = ph.productUsecase.GetAllProducts()
+
+	}
+	if minPrice > 0 || maxPrice > 0 {
+		products, err = ph.productUsecase.GetProductsByPriceRange(uint(minPrice), uint(maxPrice))
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+	}
+	if value != "" || description != "" {
+		products, err = ph.productUsecase.GetProductsByCharacteristics(value, description)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
 	}
 
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	}
 	return c.JSON(products)
 }
 
@@ -261,24 +270,4 @@ func (ph *ProductHandler) GetProductsByCategory(c *fiber.Ctx) error {
 	}
 	return c.JSON(products)
 
-}
-
-func (ph *ProductHandler) GetProductsByCharacteristics(c *fiber.Ctx) error {
-	// Получаем значения параметров запроса value и description
-	value := c.Query("value")
-	description := c.Query("description")
-
-	// Проверяем, что оба параметра присутствуют в запросе
-	if value == "" || description == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Both 'value' and 'description' parameters are required"})
-	}
-
-	// Получаем все продукты с характеристиками, соответствующими указанным значениям и описанию
-	products, err := ph.productUsecase.GetProductsByCharacteristics(value, description)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	// Возвращаем найденные продукты
-	return c.JSON(products)
 }

@@ -24,6 +24,14 @@ func main() {
 	productUsecase := usecase.NewProductUseCase(productRepository, productService)
 	productHandler := handler.NewProductHandler(productUsecase)
 
+	langRepo := repository.NewLanguageRepository(db)
+	langUsecase := usecase.NewLanguageUseCase(langRepo)
+	langHandler := handler.NewLanguageHandler(langUsecase)
+
+	translationRepository := repository.NewTranslationRepository(db)
+	translationUsecase := usecase.NewTranslationUseCase(translationRepository)
+	translationHandler := handler.NewTranslationHandler(translationUsecase)
+
 	app := fiber.New()
 	app.Use(func(c *fiber.Ctx) error {
 		c.Set("Access-Control-Allow-Origin", "*")
@@ -48,6 +56,22 @@ func main() {
 	api.Get("/products/:id", productHandler.GetProductByID)
 	api.Delete("/products/:id", productHandler.DeleteProduct)
 	api.Get("/categories/:id/products", productHandler.GetProductsByCategory)
+
+	api.Get("/languages", langHandler.GetAllLanguages)
+	api.Get("/languages/:id", langHandler.GetLanguageByID)
+	api.Post("/languages", langHandler.CreateLanguage)
+	api.Patch("/languages/:id", langHandler.UpdateLanguage)
+	api.Delete("/languages/:id", langHandler.DeleteLanguage)
+
+	api.Get("/products/:product_id/translations", translationHandler.GetProductTranslationsByProductID)
+	api.Post("/translations/product", translationHandler.CreateProductTranslation)
+	api.Patch("/translations/product/:id", translationHandler.UpdateProductTranslation)
+	api.Delete("/translations/product/:id", translationHandler.DeleteProductTranslation)
+
+	api.Get("/characteristics/:characteristic_id/translations", translationHandler.GetCharacteristicTranslationsByCharacteristicID)
+	api.Post("/translations/characteristic", translationHandler.CreateCharacteristicTranslation)
+	api.Patch("/translations/characteristic/:id", translationHandler.UpdateCharacteristicTranslation)
+	api.Delete("/translations/characteristic/:id", translationHandler.DeleteCharacteristicTranslation)
 
 	log.Println("Server is runnig on :8082")
 	log.Fatal(app.Listen(":8082"))

@@ -1,14 +1,13 @@
 package main
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"log"
 	"media-app/internal"
 	"media-app/internal/app/handler"
 	"media-app/internal/app/repository"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -37,7 +36,6 @@ func main() {
 		return c.Next()
 	})
 	api := app.Group("/api")
-
 	api.Get("/categories", categoryHandler.GetAllCategories)
 	api.Post("/categories", categoryHandler.CreateCategory)
 	api.Patch("/categories/:id", categoryHandler.UpdateCategory)

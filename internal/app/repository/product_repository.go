@@ -136,7 +136,7 @@ func (pr *productRepository) UpdateProduct(product entity.Product, id uint) erro
 
 func (pr *productRepository) GetAllProducts() ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Preload("Images").Preload("Characteristics").Preload("Category").Find(&products).Error; err != nil {
+	if err := pr.db.Preload("Images").Preload("Characteristics").Preload("Category").Preload("Translations").Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
@@ -144,7 +144,7 @@ func (pr *productRepository) GetAllProducts() ([]entity.Product, error) {
 
 func (pr *productRepository) GetProductByID(id uint) (*entity.Product, error) {
 	var product *entity.Product
-	if err := pr.db.Preload("Category").Preload("Images").Preload("Characteristics").First(&product, id).Error; err != nil {
+	if err := pr.db.Preload("Category").Preload("Images").Preload("Characteristics").Preload("Translations").First(&product, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -154,7 +154,7 @@ func (pr *productRepository) GetProductByID(id uint) (*entity.Product, error) {
 
 func (pr *productRepository) GetProductsWithPagination(limit int) ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Preload("Images").Preload("Characteristics").Preload("Category").Limit(limit).Find(&products).Error; err != nil {
+	if err := pr.db.Preload("Images").Preload("Characteristics").Preload("Category").Preload("Translations").Limit(limit).Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
@@ -172,7 +172,7 @@ func (pr *productRepository) DeleteProduct(id uint) error {
 
 func (pr *productRepository) GetProductsByCategoryID(id uint) ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Where("category_id = ?", id).Find(&products); err != nil {
+	if err := pr.db.Where("category_id = ?", id).Preload("Translations").Find(&products); err != nil {
 
 	}
 	return products, nil
@@ -180,7 +180,7 @@ func (pr *productRepository) GetProductsByCategoryID(id uint) ([]entity.Product,
 
 func (pr *productRepository) GetProductsByPriceRange(minPrice, maxPrice uint) ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Where("price >= ? AND price <= ?", minPrice, maxPrice).Find(&products).Error; err != nil {
+	if err := pr.db.Where("price >= ? AND price <= ?", minPrice, maxPrice).Preload("Translations").Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
@@ -192,7 +192,7 @@ func (pr *productRepository) GetProductsSortedByPriceAndCategory(sortOrder strin
 	if sortOrder == "expensive" {
 		order = "price DESC"
 	}
-	if err := pr.db.Where("category_id = ?", categoryID).Order(order).Find(&products).Error; err != nil {
+	if err := pr.db.Where("category_id = ?", categoryID).Order(order).Preload("Translations").Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
@@ -203,6 +203,7 @@ func (pr *productRepository) GetProductsByCharacteristics(value, description str
 	if err := pr.db.
 		Joins("JOIN characteristics ON products.id = characteristics.product_id").
 		Where("value = ? AND description = ?", value, description).
+		Preload("Translations").
 		Find(&products).
 		Error; err != nil {
 		return nil, err

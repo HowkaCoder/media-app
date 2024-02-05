@@ -84,6 +84,7 @@ func (pu *productUseCase) CreateProduct(product *entity.Product) error {
 
 func (pu *productUseCase) GetProductsByCharacteristics(value, description string) ([]entity.Product, error) {
 	return pu.productRepo.GetProductsByCharacteristics(value, description)
+
 }
 
 func (pu *productUseCase) GetAllProducts() ([]entity.Product, error) {

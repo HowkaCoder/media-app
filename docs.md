@@ -1,352 +1,117 @@
 
 
-# API Documentation
+## Media App API Documentation for Frontend Developers
 
-## Base URL
+This document outlines the available endpoints and their usage for managing media categories in the Media App backend.
+
+### Base URL
+
+All endpoints are relative to the base URL of the Media App API.
+
 ```
-http://your-domain.com/api
+http://your-api-url.com/api/categories
 ```
 
-## Categories
+### Retrieve All Categories
 
-### Get All Categories
 ```
-GET /categories
+GET /api/categories
 ```
+
+#### Description
+
+Retrieves all categories from the database.
+
+#### Parameters
+
+None
+
 #### Response
-```json
-[
-{
-"id": 1,
-"name": "Category 1"
-},
-{
-"id": 2,
-"name": "Category 2"
-}
-]
+
+- **200 OK**: Returns an array of category objects.
+- **500 Internal Server Error**: Indicates a server error.
+
+### Create a New Category
+
+```
+POST /api/categories
 ```
 
-### Get Category by ID
-```
-GET /categories/:id
-```
+#### Description
+
+Creates a new category in the database.
+
+#### Parameters
+
+- **Request Body**: Category object containing category details.
+
 #### Response
-```json
-{
-"id": 1,
-"name": "Category 1"
-}
+
+- **201 Created**: Returns the created category object.
+- **400 Bad Request**: Indicates invalid request parameters.
+- **500 Internal Server Error**: Indicates a server error.
+
+### Update an Existing Category
+
+```
+PATCH /api/categories/:id
 ```
 
-### Create Category
-```
-POST /categories
-```
+#### Description
+
+Updates an existing category in the database.
+
+#### Parameters
+
+- **:id**: ID of the category to be updated.
+
 #### Request Body
-```json
-{
-"name": "New Category"
-}
-```
+
+Category object containing updated category details.
+
 #### Response
-```json
-{
-"id": 3,
-"name": "New Category"
-}
+
+- **200 OK**: Indicates successful update.
+- **404 Not Found**: Indicates that the category with the specified ID was not found.
+- **500 Internal Server Error**: Indicates a server error.
+
+### Retrieve a Single Category
+
+```
+GET /api/categories/:id
 ```
 
-### Update Category
-```
-PATCH /categories/:id
-```
-#### Request Body
-```json
-{
-"name": "Updated Category"
-}
-```
+#### Description
+
+Retrieves a single category from the database by its ID.
+
+#### Parameters
+
+- **:id**: ID of the category to retrieve.
+
 #### Response
-```json
-{
-"id": 1,
-"name": "Updated Category"
-}
+
+- **200 OK**: Returns the category object.
+- **404 Not Found**: Indicates that the category with the specified ID was not found.
+- **500 Internal Server Error**: Indicates a server error.
+
+### Delete a Category
+
+```
+DELETE /api/categories/:id
 ```
 
-### Delete Category
-```
-DELETE /categories/:id
-```
+#### Description
+
+Deletes a category from the database by its ID.
+
+#### Parameters
+
+- **:id**: ID of the category to delete.
+
 #### Response
-```json
-{
-"message": "Category successfully deleted"
-}
-```
 
-## Attributes
-
-### Get All Attributes
-```
-GET /attributes
-```
-#### Response
-```json
-[
-{
-"id": 1,
-"nameUZ": "Attribute 1",
-"nameKK": "Attribute 1",
-"nameRU": "Attribute 1",
-"nameEN": "Attribute 1"
-},
-{
-"id": 2,
-"nameUZ": "Attribute 2",
-"nameKK": "Attribute 2",
-"nameRU": "Attribute 2",
-"nameEN": "Attribute 2"
-}
-]
-```
-
-### Get Attribute by ID
-```
-GET /attributes/:id
-```
-#### Response
-```json
-{
-"id": 1,
-"nameUZ": "Attribute 1",
-"nameKK": "Attribute 1",
-"nameRU": "Attribute 1",
-"nameEN": "Attribute 1"
-}
-```
-
-### Create Attribute
-```
-POST /attributes
-```
-#### Request Body
-```json
-{
-"nameUZ": "New Attribute",
-"nameKK": "New Attribute",
-"nameRU": "New Attribute",
-"nameEN": "New Attribute"
-}
-```
-#### Response
-```json
-{
-"id": 3,
-"nameUZ": "New Attribute",
-"nameKK": "New Attribute",
-"nameRU": "New Attribute",
-"nameEN": "New Attribute"
-}
-```
-
-### Update Attribute
-```
-PATCH /attributes/:id
-```
-#### Request Body
-```json
-{
-"nameUZ": "Updated Attribute",
-"nameKK": "Updated Attribute",
-"nameRU": "Updated Attribute",
-"nameEN": "Updated Attribute"
-}
-```
-#### Response
-```json
-{
-"id": 1,
-"nameUZ": "Updated Attribute",
-"nameKK": "Updated Attribute",
-"nameRU": "Updated Attribute",
-"nameEN": "Updated Attribute"
-}
-```
-
-### Delete Attribute
-```
-DELETE /attributes/:id
-```
-#### Response
-```json
-{
-"message": "Attribute successfully deleted"
-}
-```
-
-## Products
-
-### Get All Products
-```
-GET /products
-```
-#### Response
-```json
-[
-{
-"id": 1,
-"name": "Product 1",
-"category": {
-"id": 1,
-"name": "Category 1"
-},
-"images": [
-{
-"id": 1,
-"path": "/path/to/image1.jpg"
-},
-{
-"id": 2,
-"path": "/path/to/image2.jpg"
-}
-],
-"attributes": [
-{
-"id": 1,
-"nameUZ": "Attribute 1",
-"nameKK": "Attribute 1",
-"nameRU": "Attribute 1",
-"nameEN": "Attribute 1",
-"valueUZ": "Value 1",
-"valueKK": "Value 1",
-"valueRU": "Value 1",
-"valueEN": "Value 1"
-},
-{
-"id": 2,
-"nameUZ": "Attribute 2",
-"nameKK": "Attribute 2",
-"nameRU": "Attribute 2",
-"nameEN": "Attribute 2",
-"valueUZ": "Value 2",
-"valueKK": "Value 2",
-"valueRU": "Value 2",
-"valueEN": "Value 2"
-}
-]
-},
-{
-"id": 2,
-"name": "Product 2",
-...
-}
-]
-```
-
-### Create Product
-```
-POST /products
-```
-#### Request Body
-```json
-{
-"product": {
-"name": "New Product",
-"category_id": 1
-},
-"images": [
-{
-"path": "/path/to/image1.jpg"
-},
-{
-"path": "/path/to/image2.jpg"
-}
-],
-"values": [
-{
-"attribute_id": 1,
-"valueUZ": "Value 1",
-"valueKK": "Value 1",
-"valueRU": "Value 1",
-"valueEN": "Value 1"
-},
-{
-"attribute_id": 2,
-"valueUZ": "Value 2",
-"valueKK": "Value 2",
-"valueRU": "Value 2",
-"valueEN": "Value 2"
-}
-]
-}
-```
-#### Response
-```json
-{
-"id": 3,
-"name": "New Product",
-...
-}
-```
-
-### Update Product
-```
-PATCH /products/:id
-```
-#### Request Body
-```json
-{
-"product": {
-"name": "Updated Product",
-...
-},
-"images": [
-{
-"id": 1,
-"path": "/path/to/image1.jpg"
-},
-{
-"id": 2,
-"path": "/path/to/image2.jpg"
-}
-],
-"values": [
-{
-"id": 1,
-"attribute_id": 1,
-"valueUZ": "Updated Value 1",
-...
-},
-{
-"id": 2,
-"attribute_id": 2,
-"valueUZ": "Updated Value 2",
-...
-}
-]
-}
-```
-#### Response
-```json
-{
-"id": 1,
-"name": "Updated Product",
-...
-}
-```
-
-### Delete Product
-```
-DELETE /products/:id
-```
-#### Response
-```json
-
-
-{
-"message": "Product successfully deleted"
-}
-```
+- **200 OK**: Indicates successful deletion.
+- **404 Not Found**: Indicates that the category with the specified ID was not found.
+- **500 Internal Server Error**: Indicates a server error.
 

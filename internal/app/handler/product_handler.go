@@ -262,3 +262,23 @@ func (ph *ProductHandler) GetProductsByCategory(c *fiber.Ctx) error {
 	return c.JSON(products)
 
 }
+
+func (ph *ProductHandler) GetProductsByCharacteristics(c *fiber.Ctx) error {
+	// Получаем значения параметров запроса value и description
+	value := c.Query("value")
+	description := c.Query("description")
+
+	// Проверяем, что оба параметра присутствуют в запросе
+	if value == "" || description == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Both 'value' and 'description' parameters are required"})
+	}
+
+	// Получаем все продукты с характеристиками, соответствующими указанным значениям и описанию
+	products, err := ph.productUsecase.GetProductsByCharacteristics(value, description)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Возвращаем найденные продукты
+	return c.JSON(products)
+}

@@ -1,21 +1,21 @@
-# Используем официальный образ Golang в качестве базового образа
+# Use the official Golang image as the base image
 FROM golang:latest
 
-# Установка рабочей директории внутри контейнера
+# Set the working directory inside the container
 WORKDIR /app
 
-# Копируем все файлы из текущего каталога (.) в рабочую директорию (/app) внутри контейнера
+# Copy all files from the current directory (.) into the working directory (/app) inside the container
 COPY . .
 
-# Копируем файл базы данных внутрь контейнера
-COPY ./cmd/database/database.db ./cmd/database/database.db
+# Copy the database file into the container
+COPY ./database/database.db ./cmd/database/database.db
 
-# Собираем ваше приложение (предполагается, что main.go находится внутри папки cmd)
+# Build your application (assuming main.go is located inside the cmd directory)
 RUN go build -o main ./cmd
 
-# Определяем порт, который будет использоваться вашим приложением
+# Expose the port that your application will use
 EXPOSE 8082
 
-# Команда, которая будет запущена при запуске контейнера
+# Command to run when the container starts
 CMD ["./main"]
 

@@ -195,6 +195,10 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 		}
 	}
 
+	products, err = ph.productUsecase.GetAllProducts()
+	if err != nil {
+		return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Error": err.Error()})
+	}
 	return c.JSON(products)
 }
 

@@ -2,7 +2,7 @@
 
 ## Base URL
 ```
-http://your-domain.com/api
+https://mediaapp-uksut1q4.b4a.run/api/
 ```
 
 ## Categories
@@ -16,6 +16,8 @@ GET /categories
 [
 {
 "id": 1,
+"parent_category_id":0,
+"level":1,
 "name": "Category 1"
 },
 {

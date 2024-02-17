@@ -1,7 +1,11 @@
 package handler
 
 import (
+	"encoding/base64"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"io/ioutil"
 	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/usecase"
@@ -46,11 +50,33 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 
 	images := form.File["images[]"]
 
-	for _, imageFile := range images {
-		photoPath := filepath.Join("uploads", "photo", imageFile.Filename)
+	var base64Images []string
 
-		if err := c.SaveFile(imageFile, photoPath); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo", "error": err.Error()})
+	for _, imageFile := range images {
+		file, err := imageFile.Open()
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to open image file", "details": err.Error()})
+		}
+		defer file.Close()
+
+		fileContent, err := ioutil.ReadAll(file)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to read image file", "details": err.Error()})
+		}
+
+		base64Image := base64.StdEncoding.EncodeToString(fileContent)
+		base64Images = append(base64Images, base64Image)
+	}
+
+	for _, imageData := range base64Images {
+		decodedImage, err := base64.StdEncoding.DecodeString(imageData)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "failed to decode base64 image", "details": err.Error()})
+		}
+
+		photoPath := filepath.Join("uploads", "photo", fmt.Sprintf("%s.jpg", uuid.New().String())) // Generate a unique filename
+		if err := ioutil.WriteFile(photoPath, decodedImage, 0644); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save photo", "details": err.Error()})
 		}
 
 		image := entity.Image{
@@ -63,7 +89,6 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 		} else {
 			log.Println(request.Product.ID)
 		}
-
 	}
 	for _, chars := range request.Characteristics {
 		chars.ProductID = request.Product.ID

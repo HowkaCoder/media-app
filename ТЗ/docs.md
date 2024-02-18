@@ -633,3 +633,244 @@ sort ( optional ) - "cheap" or "expensive"
 }
 ]
 ```
+
+
+
+
+
+# User API + Auth
+
+## Register
+```
+POST /register
+```
+**Request**
+```json
+{
+"username":"h0wka",
+"firstname":"John",
+"lastname":"Kanedi",
+"age":78,
+"address":"Wall street",
+"phone":9989324983244,
+"password":"2390i2ke23e",
+"role":"admin",
+"avatar":"path" (multipart-form-data)
+}
+```
+**Response**
+```json
+{
+"message": "User registered successfully"
+}
+
+```
+
+
+## Login
+
+```json
+POST  /login
+```
+
+**Request**
+```json
+{
+"usename":"h0wka",
+"password":"2390i2ke23e"
+}
+```
+
+**Response**
+```json
+{
+"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImRocXdod3Vkd2UiLCJyb2xlIjoiYWRtaW4iLCJmaXJzdG5hbWUiOiJkaHF3aHd1ZHdlIiwibGFzdG5hbWUiOiJkZXd1ZGh3aXVkdyIsImFnZSI6MTMyNDQyLCJhZGRyZXNzIjoiamR3ZWlqd29kaWV3IiwiZXhwIjoxNzA4Mjc5NDgyfQ.v12YhWiz1-u2CBEzn1bPJJhiN4IJHv-rx34IqfkH4r0",
+"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImRocXdod3Vkd2UiLCJyb2xlIjoiYWRtaW4iLCJmaXJzdG5hbWUiOiJkaHF3aHd1ZHdlIiwibGFzdG5hbWUiOiJkZXd1ZGh3aXVkdyIsImFnZSI6MTMyNDQyLCJhZGRyZXNzIjoiamR3ZWlqd29kaWV3IiwiZXhwIjoxNzA4ODgzMzgyfQ.AhBh3FO8RhtJEyr3DpZcZ5vl-2jk4snsJnnQlG-6Yko"
+}
+```
+
+## Create Ava By User ID
+**Authorization**
+```
+Bearer Token : User Access token
+```
+**URL And Method**
+```
+PATCH /api/users/:id/ava
+```
+**Request**
+```json
+{
+"avatar":"path" ( multipart-form-data)
+}
+```
+
+**Response**
+```json
+{
+"message": "Successfully created ava"
+}
+```
+
+
+## Delete Ava By User ID
+**Authorization**
+```
+Bearer Token : User Access token
+```
+**URL And Method**
+```
+Delete /api/users/:id/ava
+```
+
+**Response**
+```json
+{
+"message": "Ava successfully deleted"
+}
+```
+
+## Get All Users
+**Authorization**
+```
+Bearer Token : Admin Access token
+```
+**URL And Method**
+```
+GET /users
+```
+
+**Response**
+```json
+[
+{
+"CreatedAt": "2024-02-17T23:23:47.899172459+05:00",
+"UpdatedAt": "2024-02-17T23:23:47.899172459+05:00",
+"DeletedAt": null,
+"ID": 1,
+"Username": "dehewiudwwe",
+"Firstname": "dhqwhwudwe",
+"Lastname": "dewudhwiudw",
+"Age": 132442,
+"Phone": 932423424,
+"Address": "jdweijwodiew",
+"Password": "$2a$10$WIwKxS7oWhqmvZ9dimW3Fex1Ahyc9tLlijUKAwdLdInNUg2u7ZZI2",
+"Role": "admin",
+"Ava": {
+"CreatedAt": "2024-02-17T23:23:47.907280999+05:00",
+"UpdatedAt": "2024-02-17T23:23:47.907280999+05:00",
+"DeletedAt": null,
+"ID": 1,
+"UserID": 1,
+"Path": "uploads/photo/20231123_163917.jpg"
+}
+},
+{
+"CreatedAt": "2024-02-18T22:46:16.175780876+05:00",
+"UpdatedAt": "2024-02-18T22:46:16.175780876+05:00",
+"DeletedAt": null,
+"ID": 2,
+"Username": "dehewiudwwe",
+"Firstname": "dhqwhwudwe",
+"Lastname": "dewudhwiudw",
+"Age": 132442,
+"Phone": 932423424,
+"Address": "jdweijwodiew",
+"Password": "$2a$10$AcilTY5L3Of3FsLGNtVmNuduA4zkGFZm63ELT/Ktko6OjLnq4Bxc.",
+"Role": "admin",
+"Ava": {
+"CreatedAt": "2024-02-18T22:46:16.181861907+05:00",
+"UpdatedAt": "2024-02-18T22:46:16.181861907+05:00",
+"DeletedAt": null,
+"ID": 2,
+"UserID": 2,
+"Path": "uploads/photo/20231123_163917.jpg"
+}
+},
+]
+```
+
+## Get User By ID
+**Authorization**
+```
+Bearer Token : User Access token
+```
+**URL And Method**
+```
+GET /api/users/6
+```
+
+**Response**
+```json
+{
+"CreatedAt": "2024-02-18T23:20:12.570177424+05:00",
+"UpdatedAt": "2024-02-18T23:20:12.570177424+05:00",
+"DeletedAt": null,
+"ID": 6,
+"Username": "1q2w3e",
+"Firstname": "dhqwhwudwe",
+"Lastname": "dewudhwiudw",
+"Age": 132442,
+"Phone": 932423424,
+"Address": "jdweijwodiew",
+"Password": "$2a$10$GrCwroSfCqni4rhncXwkwe0MbuekrMrGFEo4SHhpLlOsvwP7soFHa",
+"Role": "admin",
+"Ava": {
+"CreatedAt": "2024-02-18T23:20:12.583217469+05:00",
+"UpdatedAt": "2024-02-18T23:20:12.583217469+05:00",
+"DeletedAt": null,
+"ID": 7,
+"UserID": 6,
+"Path": "uploads/photo/20231123_163917.jpg"
+}
+}
+```
+
+
+
+## Update User
+```
+PATCH /api/users/:id
+```
+**Request**
+```json
+{
+"username":"h0wka",
+"firstname":"John",
+"lastname":"Kanedi",
+"age":78,
+"address":"Wall street",
+"phone":9989324983244,
+"password":"2390i2ke23e",
+"role":"admin",
+"avatar":"path" (multipart-form-data)
+}
+```
+**Response**
+```json
+{
+"message": "User updated successfully"
+}
+
+```
+
+
+
+
+
+## Delete User By ID
+**Authorization**
+```
+Bearer Token : User Access token
+```
+**URL And Method**
+```
+Delete /api/users/:id/
+```
+
+**Response**
+```json
+{
+"message": "successfully deleted user"
+}
+```

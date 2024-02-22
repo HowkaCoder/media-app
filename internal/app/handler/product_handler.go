@@ -24,11 +24,6 @@ func NewProductHandler(useCase usecase.ProductUseCase) *ProductHandler {
 
 func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 
-	c.Set("Access-Control-Allow-Origin", "*")
-	c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-	c.Set("Access-Control-Allow-Headers", "Content-Type")
-	c.Set("Access-Control-Allow-Credentials", "true")
-
 	var request struct {
 		Product         entity.Product           `json:"product"`
 		Images          []*entity.Image          `json:"images"`

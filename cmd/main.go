@@ -56,6 +56,7 @@ func main() {
 	app.Get("/api/languages/:id", langHandler.GetLanguageByID)
 	app.Get("/api/products/:product_id/translations", translationHandler.GetProductTranslationsByProductID)
 	app.Get("/api/characteristics/:characteristic_id/translations", translationHandler.GetCharacteristicTranslationsByCharacteristicID)
+
 	api := app.Group("/api", userHandler.AuthenticateToken)
 
 	api.Post("/categories", userHandler.AuthorizeRole("admin"), categoryHandler.CreateCategory)

@@ -201,7 +201,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	photoPath := "uploads/photo/" + photoFile.Filename
 	if err := c.SaveFile(photoFile, photoPath); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo", "photoFile": photoFile})
 	}
 
 	if err := uh.userUsecase.CreateUser(user); err != nil {

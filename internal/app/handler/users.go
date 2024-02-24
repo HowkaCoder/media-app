@@ -191,6 +191,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
 	user.Password = string(hashedPassword)
 
 	photoFile, err := c.FormFile("avatar")

@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/repository"
 )
@@ -22,12 +21,11 @@ func NewProductService(categoryRepository repository.CategoryRepository) *produc
 func (ps *productService) ValidateProduct(product *entity.Product) error {
 	category, err := ps.categoryRepo.GetSingleCategory(product.CategoryID)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return err
-		}
+		return err
+
 	}
 	if category.ID == 0 {
-		errors.New("Error with categoryID")
+		return errors.New("Error with categoryID")
 	}
 
 	return nil

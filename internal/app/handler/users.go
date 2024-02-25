@@ -232,16 +232,15 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	//}
 
+	if err := uh.userUsecase.CreateUser(&user); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
+	}
 	ava := entity.Ava{
 		UserID: user.ID,
 		Path:   photoPath,
 	}
 	if err := uh.userUsecase.CreateAva(&ava); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	}
-
-	if err := uh.userUsecase.CreateUser(&user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
 	}
 	return c.JSON(fiber.Map{
 		"message": "User registered successfully",

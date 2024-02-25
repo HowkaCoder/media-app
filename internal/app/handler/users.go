@@ -246,6 +246,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "User registered successfully",
 		"user":    user,
+		"ava":     ava,
 	})
 }
 

@@ -232,11 +232,11 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	//}
 
-	ava := &entity.Ava{
+	ava := entity.Ava{
 		UserID: user.ID,
 		Path:   photoPath,
 	}
-	if err := uh.userUsecase.CreateAva(ava); err != nil {
+	if err := uh.userUsecase.CreateAva(&ava); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 

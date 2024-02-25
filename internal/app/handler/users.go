@@ -177,7 +177,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	}
 	age, _ := strconv.Atoi(form.Value["age"][0])
 	phone, _ := strconv.Atoi(form.Value["phone"][0])
-	user := &entity.User{
+	user := entity.User{
 		Username:  form.Value["username"][0],
 		Firstname: form.Value["firstname"][0],
 		Lastname:  form.Value["lastname"][0],
@@ -240,7 +240,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 
-	if err := uh.userUsecase.CreateUser(user); err != nil {
+	if err := uh.userUsecase.CreateUser(&user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
 	}
 	return c.JSON(fiber.Map{

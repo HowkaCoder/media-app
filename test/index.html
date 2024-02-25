@@ -7,71 +7,60 @@
 </head>
 <body>
 <h1>Image Upload Test</h1>
-<input type="file" id="imageInput" multiple>
 <button onclick="uploadImages()">Upload Images</button>
 <div id="response"></div>
 
 <script>
-    function uploadImages() {
-        var input = document.getElementById('imageInput');
-        var files = input.files;
-        var images = []; // Массив для хранения base64-строк изображений
-
-        // Функция для чтения изображения в формат base64
-        function readFile(file) {
-            return new Promise((resolve, reject) => {
-                var reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(',')[1]); // Удаляем префикс data:image/*;base64,
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Проход по каждому файлу и добавление его в массив images[]
-        Promise.all(Array.from(files).map(file => readFile(file)))
-            .then(results => {
-                images = results;
-                console.log(images); // Выводим в консоль для проверки
-                if (images.length > 0) {
-                    sendImagesToServer(images); // Отправляем изображения на сервер только если массив не пустой
-                } else {
-                    console.error('No images to upload.');
-                }
-            })
-            .catch(error => {
-                console.error('Error reading files:', error);
-                var responseDiv = document.getElementById('response');
-                responseDiv.innerHTML = '<p>Error reading files: ' + error.message + '</p>';
-            });
+    const formData = new FormData();
+    const jsonData = {
+        "product": {
+            "name": "Название продукта",
+            "price": 100,
+            "discount": 100,
+            "quantity": 10,
+            "category_id": 1
+        },
+        "images": [
+            {
+                "path": "/путь/к/изображению1.jpg"
+            },
+            {
+                "path": "/путь/к/изображению2.jpg"
+            }
+        ],
+        "characteristics": [
+            {
+                "value": "Значение характеристики 1",
+                "description": "Описание характеристики 1"
+            },
+            {
+                "value": "Значение характеристики 2",
+                "description": "Описание характеристики 2"
+            }
+        ]
     }
 
-    // Функция для отправки изображений на сервер
-    function sendImagesToServer(images) {
-        var formData = new FormData();
 
-        // Преобразуем массив images в JSON-строку и добавляем ее в FormData
-        formData.append('images', JSON.stringify(images));
 
-        // Отправляем массив изображений на сервер
-        fetch('http://127.0.0.1:8082/api/images', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                var responseDiv = document.getElementById('response');
-                if (data.File) {
-                    responseDiv.innerHTML = '<p>Images uploaded successfully. Path: ' + data.File + '</p>';
-                } else {
-                    responseDiv.innerHTML = '<p>Error: ' + data.error + '</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error sending images to server:', error);
-                var responseDiv = document.getElementById('response');
-                responseDiv.innerHTML = '<p>Error sending images to server: ' + error.message + '</p>';
-            });
-    }
+    formData.append('json', JSON.stringify(jsonData));
+
+  function uploadImages(){
+      fetch('http://127.0.0.1:8082/api/products', {
+          method: 'POST',
+          body: formData,
+          headers: {
+
+              'Accept': 'application/json',
+              'Accept-Encoding':'gzip, deflate, br',
+              'Connection':'keep-alive'
+          }
+      })
+          .then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error('Error:', error));
+      console.log(formData)
+  }
+
 </script>
 </body>
 </html>

@@ -78,7 +78,7 @@ func (pu *productUseCase) DeleteCharacteristic(id uint) error {
 // PRODUCT FUNCTIONS
 
 func (pu *productUseCase) CreateProduct(product *entity.Product) error {
-	pu.productService.ValidateProduct(product)
+	//pu.productService.ValidateProduct(product)
 	return pu.productRepo.CreateProduct(product)
 }
 

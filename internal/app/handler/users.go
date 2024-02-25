@@ -199,7 +199,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "invalid form data"})
 	}
 
-	photoPath := "uploads/photo/" + photoFile.Filename
+	photoPath := "cmd/uploads/photo/" + photoFile.Filename
 
 	if err := c.SaveFile(photoFile, photoPath); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo", "Err": err.Error()})

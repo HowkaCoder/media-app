@@ -205,33 +205,6 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo", "Err": err.Error()})
 	}
 
-	//file, err := photoFile.Open()
-	//if err != nil {
-	//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to open image file", "details": err.Error()})
-	//}
-	//defer file.Close()
-	//
-	//fileContent, err := ioutil.ReadAll(file)
-	//if err != nil {
-	//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to read image file", "details": err.Error()})
-	//}
-	//
-	//base64Image := base64.StdEncoding.EncodeToString(fileContent)
-	//
-	//decodedImage, err := base64.StdEncoding.DecodeString(base64Image)
-	//if err != nil {
-	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "failed to decode base64 image", "details": err.Error()})
-	//}
-	//
-	//photoPath := filepath.Join("uploads", "photo", fmt.Sprintf("%s.jpg", uuid.New().String())) // Generate a unique filename
-	//if err := ioutil.WriteFile(photoPath, decodedImage, 0644); err != nil {
-	//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save photo", "details": err.Error()})
-	//}
-	//
-	//if err := uh.userUsecase.CreateUser(user); err != nil {
-	//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	//}
-
 	if err := uh.userUsecase.CreateUser(&user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
 	}

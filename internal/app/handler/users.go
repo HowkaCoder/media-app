@@ -1,14 +1,18 @@
 package handler
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"io/ioutil"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -194,25 +198,38 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	user.Password = string(hashedPassword)
 
-	photoFile, err := c.FormFile("avatar")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "invalid form data"})
-	}
-
-	photoPath := "cmd/uploads/photo/" + photoFile.Filename
-
-	if err := c.SaveFile(photoFile, photoPath); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo", "Err": err.Error()})
-	}
+	//photoFile, err := c.FormFile("avatar")
+	//if err != nil {
+	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "invalid form data"})
+	//}
+	//
+	//photoPath := "cmd/uploads/photo/" + photoFile.Filename
+	//
+	//if err := c.SaveFile(photoFile, photoPath); err != nil {
+	//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo", "Err": err.Error()})
+	//}
 
 	if err := uh.userUsecase.CreateUser(&user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
 	}
-	ava := entity.Ava{
+
+	// BASE64Decoding
+	ava, err := base64.URLEncoding.DecodeString(form.Value["avatar"][0])
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to decode base64 image", "details": err.Error()})
+	}
+
+	// Generate a unique filename
+	photoPath := filepath.Join("uploads", "photo", fmt.Sprintf("%s.jpg", uuid.New().String()))
+	if err := ioutil.WriteFile(photoPath, ava, 0644); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save photo", "details": err.Error()})
+	}
+
+	Ava := entity.Ava{
 		UserID: user.ID,
 		Path:   photoPath,
 	}
-	if err := uh.userUsecase.CreateAva(&ava); err != nil {
+	if err := uh.userUsecase.CreateAva(&Ava); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 	return c.JSON(fiber.Map{

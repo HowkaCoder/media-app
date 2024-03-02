@@ -1,18 +1,13 @@
 package handler
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"io/ioutil"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -63,8 +58,10 @@ func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
 	age, _ := strconv.Atoi(form.Value["age"][0])
 	phone, _ := strconv.Atoi(form.Value["phone"][0])
+
 	user := &entity.User{
 		Username:  form.Value["username"][0],
 		Firstname: form.Value["firstname"][0],
@@ -73,8 +70,10 @@ func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
 		Phone:     uint(phone),
 		Address:   form.Value["address"][0],
 		Password:  form.Value["password"][0],
+		Ava:       form.Value["avatar"][0],
 		Role:      form.Value["role"][0],
 	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -82,28 +81,6 @@ func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
 	user.Password = string(hashedPassword)
 
 	if err := uh.userUsecase.UpdateUser(user, uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
-	}
-	image, err := uh.userUsecase.GetAvaByUserID(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Error": err.Error()})
-	}
-	if err := os.Remove(image.Path); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	}
-	if err := uh.userUsecase.DeleteAva(image.ID); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-	photoFile, err := c.FormFile("avatar")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "invalid form data"})
-	}
-
-	photoPath := "uploads/photo/" + photoFile.Filename
-	if err := c.SaveFile(photoFile, photoPath); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo"})
-	}
-	if err := uh.userUsecase.CreateAva(&entity.Ava{UserID: uint(id), Path: photoPath}); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
 	}
 
@@ -116,62 +93,10 @@ func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err})
 	}
 
-	image, err := uh.userUsecase.GetAvaByUserID(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Error": err})
-	}
-	if err := os.Remove(image.Path); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	}
-	if err := uh.userUsecase.DeleteAva(image.ID); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
 	if err := uh.userUsecase.DeleteUser(uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
 	}
 	return c.JSON(fiber.Map{"message": "successfully deleted user"})
-}
-
-func (uh *UsersHandler) CreateAva(c *fiber.Ctx) error {
-
-	id, err := strconv.Atoi(c.Params("id"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err})
-	}
-
-	photoFile, err := c.FormFile("avatar")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "invalid form data"})
-	}
-
-	photoPath := "uploads/photo/" + photoFile.Filename
-	if err := c.SaveFile(photoFile, photoPath); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo"})
-	}
-	if err := uh.userUsecase.CreateAva(&entity.Ava{UserID: uint(id), Path: photoPath}); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
-	}
-
-	return c.JSON(fiber.Map{"message": "Successfully created ava"})
-
-}
-
-func (uh *UsersHandler) DeleteAvaByUserID(c *fiber.Ctx) error {
-	id, err := strconv.Atoi(c.Params("id"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err})
-	}
-	image, err := uh.userUsecase.GetAvaByUserID(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Error": err.Error()})
-	}
-	if err := os.Remove(image.Path); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	}
-	if err := uh.userUsecase.DeleteAva(image.ID); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-	}
-	return c.JSON(fiber.Map{"message": "Ava successfully deleted"})
 }
 
 func (uh *UsersHandler) Register(c *fiber.Ctx) error {
@@ -179,8 +104,10 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
 	age, _ := strconv.Atoi(form.Value["age"][0])
 	phone, _ := strconv.Atoi(form.Value["phone"][0])
+
 	user := entity.User{
 		Username:  form.Value["username"][0],
 		Firstname: form.Value["firstname"][0],
@@ -189,6 +116,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 		Phone:     uint(phone),
 		Address:   form.Value["address"][0],
 		Password:  form.Value["password"][0],
+		Ava:       form.Value["avatar"][0],
 		Role:      form.Value["role"][0],
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -198,44 +126,13 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	user.Password = string(hashedPassword)
 
-	//photoFile, err := c.FormFile("avatar")
-	//if err != nil {
-	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "invalid form data"})
-	//}
-	//
-	//photoPath := "cmd/uploads/photo/" + photoFile.Filename
-	//
-	//if err := c.SaveFile(photoFile, photoPath); err != nil {
-	//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo", "Err": err.Error()})
-	//}
-
 	if err := uh.userUsecase.CreateUser(&user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
 	}
 
-	// BASE64Decoding
-	ava, err := base64.URLEncoding.DecodeString(form.Value["avatar"][0])
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to decode base64 image", "details": err.Error()})
-	}
-
-	// Generate a unique filename
-	photoPath := filepath.Join("uploads", "photo", fmt.Sprintf("%s.jpg", uuid.New().String()))
-	if err := ioutil.WriteFile(photoPath, ava, 0644); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save photo", "details": err.Error()})
-	}
-
-	Ava := entity.Ava{
-		UserID: user.ID,
-		Path:   photoPath,
-	}
-	if err := uh.userUsecase.CreateAva(&Ava); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	}
 	return c.JSON(fiber.Map{
 		"message": "User registered successfully",
 		"user":    user,
-		"ava":     ava,
 	})
 }
 

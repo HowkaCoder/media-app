@@ -1,17 +1,12 @@
 package handler
 
 import (
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
-	"io/ioutil"
 	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/usecase"
 	"os"
-	"path/filepath"
 	"strconv"
 )
 
@@ -22,85 +17,6 @@ type ProductHandler struct {
 func NewProductHandler(useCase usecase.ProductUseCase) *ProductHandler {
 	return &ProductHandler{productUsecase: useCase}
 }
-
-//func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
-//
-//	var request struct {
-//		Product         entity.Product          `json:"product"`
-//		Images          []entity.Image          `json:"images"`
-//		Characteristics []entity.Characteristic `json:"characteristics"`
-//	}
-//
-//	if err := c.BodyParser(&request); err != nil {
-//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 1": err.Error(), "request": request})
-//	} else {
-//		return c.JSON(fiber.Map{"request": request})
-//	}
-//
-//if err := ph.productUsecase.CreateProduct(&request.Product); err != nil {
-//	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 3 ": err.Error(), "request": request})
-//}
-//
-//form, err := c.MultipartForm()
-//if err != nil {
-//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 2 ": err.Error()})
-//}
-//
-//images := form.File["images[]"]
-//
-//var base64Images []string
-//
-//for _, imageFile := range images {
-//	file, err := imageFile.Open()
-//	if err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to open image file", "details": err.Error()})
-//	}
-//	defer file.Close()
-//
-//	fileContent, err := ioutil.ReadAll(file)
-//	if err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to read image file", "details": err.Error()})
-//	}
-//
-//	base64Image := base64.StdEncoding.EncodeToString(fileContent)
-//	base64Images = append(base64Images, base64Image)
-//}
-//
-//for _, imageData := range base64Images {
-//	decodedImage, err := base64.StdEncoding.DecodeString(imageData)
-//	if err != nil {
-//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "failed to decode base64 image", "details": err.Error()})
-//	}
-//
-//	photoPath := filepath.Join("uploads", "photo", fmt.Sprintf("%s.jpg", uuid.New().String())) // Generate a unique filename
-//	if err := ioutil.WriteFile(photoPath, decodedImage, 0644); err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save photo", "details": err.Error()})
-//	}
-//
-//	image := entity.Image{
-//		ProductID: request.Product.ID,
-//		Path:      photoPath,
-//	}
-//
-//	if err := ph.productUsecase.CreateImage(&image); err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
-//	} else {
-//		log.Println(request.Product.ID)
-//	}
-//}
-//for _, chars := range request.Characteristics {
-//	chars.ProductID = request.Product.ID
-//	log.Println(chars)
-//	if err := ph.productUsecase.CreateCharacteristic(&chars); err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 2": err.Error()})
-//	}
-//
-//	log.Println(chars)
-//
-//}
-//return c.JSON(fiber.Map{"request": &request})
-
-//}
 
 func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 	// Парсинг | анализирует данные, извлекает из них нужную информацию
@@ -129,21 +45,9 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 
 	for _, image := range request.Images {
 
-		// BASE64Decoding
-		imageData, err := base64.URLEncoding.DecodeString(image.Path)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to decode base64 image", "details": err.Error()})
-		}
-
-		// Generate a unique filename
-		photoPath := filepath.Join("uploads", "photo", fmt.Sprintf("%s.jpg", uuid.New().String()))
-		if err := ioutil.WriteFile(photoPath, imageData, 0644); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save photo", "details": err.Error()})
-		}
-
 		image := entity.Image{
 			ProductID: request.Product.ID,
-			Path:      photoPath,
+			Path:      image.Path,
 		}
 
 		if err := ph.productUsecase.CreateImage(&image); err != nil {
@@ -171,27 +75,30 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
 	}
 
-	var request struct {
-		Product         entity.Product          `json:"product"`
-		Images          []entity.Image          `json:"images"`
-		Characteristics []entity.Characteristic `json:"characteristics"`
-	}
-
-	if err := c.BodyParser(&request); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	if err := ph.productUsecase.UpdateProduct(request.Product, uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	}
-
 	form, err := c.MultipartForm()
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	images := form.File["images[]"]
+	// JSON | Эта строка извлекает данные JSON из формы, которые клиент отправил как json.
+	jsonData := form.Value["json"][0]
 
+	var request struct {
+		Product         entity.Product           `json:"product"`
+		Images          []entity.Image           `json:"images"`
+		Characteristics []*entity.Characteristic `json:"characteristics"`
+	}
+	// Этот блок кода разбирает данные JSON, полученные от клиента, и помещает их в структуру request.
+	if err := json.Unmarshal([]byte(jsonData), &request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Обновляет продукт
+	if err := ph.productUsecase.UpdateProduct(request.Product, uint(id)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+	}
+
+	// Удвляет стардые фотки
 	oldImages, err := ph.productUsecase.GetImagesByProductID(uint(id))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
@@ -206,6 +113,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		}
 	}
 
+	// Удвляет стардые характеристики
 	oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
@@ -216,16 +124,12 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		}
 	}
 
-	for _, imageFile := range images {
-		photoPath := filepath.Join("uploads", "photo", imageFile.Filename)
-
-		if err := c.SaveFile(imageFile, photoPath); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "failed to save photo", "error": err.Error()})
-		}
+	// Создает новые фотки
+	for _, imageFile := range request.Images {
 
 		image := entity.Image{
 			ProductID: request.Product.ID,
-			Path:      photoPath,
+			Path:      imageFile.Path,
 		}
 		if err := ph.productUsecase.CreateImage(&image); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
@@ -233,8 +137,9 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 	}
 
+	// УСоздает новые характеристики
 	for _, Value := range request.Characteristics {
-		if err := ph.productUsecase.CreateCharacteristic(&Value); err != nil {
+		if err := ph.productUsecase.CreateCharacteristic(Value); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		} else {
 			log.Println(Value)

@@ -13,12 +13,6 @@ type UserRepository interface {
 	CreateUser(user *entity.User) error
 	UpdateUser(user *entity.User, id uint) error
 	DeleteUser(id uint) error
-
-	// AVA
-	GetAvaByUserID(id uint) (*entity.Ava, error)
-	GetAvaByID(id uint) (*entity.Ava, error)
-	CreateAva(ava *entity.Ava) error
-	DeleteAva(id uint) error
 }
 
 type userRepository struct {
@@ -96,32 +90,4 @@ func (ur *userRepository) DeleteUser(id uint) error {
 		return err
 	}
 	return ur.db.Delete(&user).Error
-}
-
-func (ur *userRepository) GetAvaByUserID(id uint) (*entity.Ava, error) {
-	var ava *entity.Ava
-	if err := ur.db.Where("user_id = ?", id).First(&ava).Error; err != nil {
-		return nil, err
-	}
-	return ava, nil
-}
-
-func (ur *userRepository) GetAvaByID(id uint) (*entity.Ava, error) {
-	var ava *entity.Ava
-	if err := ur.db.First(&ava, id).Error; err != nil {
-		return nil, err
-	}
-	return ava, nil
-}
-
-func (ur *userRepository) CreateAva(ava *entity.Ava) error {
-	return ur.db.Create(&ava).Error
-}
-
-func (ur *userRepository) DeleteAva(id uint) error {
-	var ava entity.Ava
-	if err := ur.db.First(&ava, id).Error; err != nil {
-		return err
-	}
-	return ur.db.Delete(&ava).Error
 }

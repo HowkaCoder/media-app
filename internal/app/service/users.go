@@ -25,7 +25,7 @@ func (s *userService) GenerateAccessToken(user *entity.User) (string, error) {
 		Age:       user.Age,
 		Address:   user.Address,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 15).Unix(), // Token expires in 15 minutes
+			ExpiresAt: time.Now().Add(time.Minute * 50).Unix(), // Token expires in 15 minutes
 		},
 	})
 

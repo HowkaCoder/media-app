@@ -54,11 +54,6 @@ func Init() *gorm.DB {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.Ava{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	err = db.AutoMigrate(&entity.JWTCredentials{})
 	if err != nil {
 		log.Fatal(err)

@@ -10,7 +10,7 @@ COPY . .
 # Copy the database file into the container
 COPY ./database/database.db ./cmd/database/database.db
 
-COPY ./cmd/uploads ./cmd/uploads
+
 
 # Build your application (assuming main.go is located inside the cmd directory)
 RUN go build -o main ./cmd

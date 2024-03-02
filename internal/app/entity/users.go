@@ -20,14 +20,7 @@ type User struct {
 	Address   string `gorm:"not null"`
 	Password  string `gorm:"not null"`
 	Role      string `gorm:"not null"`
-	Ava       Ava    `gorm:"foreignKey:UserID"`
-}
-
-type Ava struct {
-	gorm.Model
-	ID     uint   `gorm:"primaryKey"`
-	UserID uint   `gorm:"not null"`
-	Path   string `gorm:"not null"`
+	Ava       string `gorm:"not null"`
 }
 
 type JWTCredentials struct {

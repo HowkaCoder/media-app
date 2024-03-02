@@ -13,12 +13,6 @@ type UsersUseCase interface {
 	CreateUser(user *entity.User) error
 	UpdateUser(user *entity.User, id uint) error
 	DeleteUser(id uint) error
-
-	// AVA
-	GetAvaByUserID(id uint) (*entity.Ava, error)
-	GetAvaByID(id uint) (*entity.Ava, error)
-	CreateAva(ava *entity.Ava) error
-	DeleteAva(id uint) error
 }
 
 type usersUseCase struct {
@@ -51,20 +45,4 @@ func (uu *usersUseCase) UpdateUser(user *entity.User, id uint) error {
 
 func (uu *usersUseCase) DeleteUser(id uint) error {
 	return uu.usersRepo.DeleteUser(id)
-}
-
-func (uu *usersUseCase) GetAvaByUserID(id uint) (*entity.Ava, error) {
-	return uu.usersRepo.GetAvaByUserID(id)
-}
-
-func (uu *usersUseCase) GetAvaByID(id uint) (*entity.Ava, error) {
-	return uu.usersRepo.GetAvaByID(id)
-}
-
-func (uu *usersUseCase) CreateAva(ava *entity.Ava) error {
-	return uu.usersRepo.CreateAva(ava)
-}
-
-func (uu *usersUseCase) DeleteAva(id uint) error {
-	return uu.usersRepo.DeleteAva(id)
 }

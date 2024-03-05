@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+</head>
+<body>
+<h1>User Registration</h1>
+<form id="registrationForm" enctype="multipart/form-data">
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" required><br>
+    <label for="firstname">First Name:</label><br>
+    <input type="text" id="firstname" name="firstname" required><br>
+    <label for="lastname">Last Name:</label><br>
+    <input type="text" id="lastname" name="lastname" required><br>
+    <label for="age">Age:</label><br>
+    <input type="number" id="age" name="age" required><br>
+    <label for="phone">Phone:</label><br>
+    <input type="tel" id="phone" name="phone" required><br>
+    <label for="address">Address:</label><br>
+    <input type="text" id="address" name="address" required><br>
+    <label for="password">Password:</label><br>
+    <input type="password" id="password" name="password" required><br>
+    <label for="avatar">Avatar (URL):</label><br>
+    <input type="text" id="avatar" name="avatar" required><br>
+    <label for="role">Role:</label><br>
+    <input type="text" id="role" name="role" required><br>
+    <input type="submit" value="Register">
+</form>
+
+<script>
+    document.getElementById("registrationForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+
+        fetch("https://media-app-97ql.onrender.com/register", {
+            method: "POST",
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Registration successful:", data);
+                // Optionally, you can redirect the user to a success page or perform other actions here
+            })
+            .catch(error => {
+                console.error("Error during registration:", error);
+                // Optionally, you can display an error message to the user
+            });
+    });
+</script>
+</body>
+</html>

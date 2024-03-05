@@ -124,7 +124,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	var logins login
 	if err := c.BodyParser(&logins); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": err})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Message": "Bad request", "Error": err})
 	}
 
 	user, err := uh.userUsecase.FindUserByUsername(logins.Username)
@@ -133,7 +133,7 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(logins.Password)); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password Error"})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password doesnt exists"})
 	}
 
 	accessToken, err := uh.userService.GenerateAccessToken(user)
@@ -149,7 +149,6 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
-		"user":          user,
 	})
 }
 

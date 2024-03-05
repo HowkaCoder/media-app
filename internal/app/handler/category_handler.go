@@ -48,7 +48,7 @@ func (h *categoryHandler) CreateCategory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(category)
+	return c.JSON(fiber.Map{"message": "category successfully created"})
 }
 
 func (h *categoryHandler) DeleteCategory(c *fiber.Ctx) error {
@@ -76,7 +76,7 @@ func (h *categoryHandler) UpdateCategory(c *fiber.Ctx) error {
 	}
 
 	if err := h.categoryUseCase.UpdateCategory(&category, uint(id)); err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 	return c.JSON(fiber.Map{"message": "updated successfully"})
 }

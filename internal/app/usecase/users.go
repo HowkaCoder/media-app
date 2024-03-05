@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/repository"
 )
@@ -24,6 +25,9 @@ func NewUsersUseCase(userRepository repository.UserRepository) *usersUseCase {
 }
 
 func (uu *usersUseCase) FindUserByUsername(username string) (*entity.User, error) {
+	if username == "" {
+		return nil, errors.New("Empty User!!")
+	}
 	return uu.usersRepo.FindUserByUsername(username)
 }
 

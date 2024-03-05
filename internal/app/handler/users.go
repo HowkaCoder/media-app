@@ -100,24 +100,29 @@ func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
 }
 
 func (uh *UsersHandler) Register(c *fiber.Ctx) error {
-	form, err := c.MultipartForm()
-	if err != nil {
-		return err
-	}
+	//form, err := c.MultipartForm()
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//age, _ := strconv.Atoi(form.Value["age"][0])
+	//phone, _ := strconv.Atoi(form.Value["phone"][0])
+	//
+	//user := entity.User{
+	//	Username:  form.Value["username"][0],
+	//	Firstname: form.Value["firstname"][0],
+	//	Lastname:  form.Value["lastname"][0],
+	//	Age:       uint(age),
+	//	Phone:     uint(phone),
+	//	Address:   form.Value["address"][0],
+	//	Password:  form.Value["password"][0],
+	//	Ava:       form.Value["avatar"][0],
+	//	Role:      form.Value["role"][0],
+	//}
 
-	age, _ := strconv.Atoi(form.Value["age"][0])
-	phone, _ := strconv.Atoi(form.Value["phone"][0])
-
-	user := entity.User{
-		Username:  form.Value["username"][0],
-		Firstname: form.Value["firstname"][0],
-		Lastname:  form.Value["lastname"][0],
-		Age:       uint(age),
-		Phone:     uint(phone),
-		Address:   form.Value["address"][0],
-		Password:  form.Value["password"][0],
-		Ava:       form.Value["avatar"][0],
-		Role:      form.Value["role"][0],
+	var user entity.User
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {

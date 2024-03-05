@@ -8,6 +8,7 @@ import (
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -100,26 +101,6 @@ func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
 }
 
 func (uh *UsersHandler) Register(c *fiber.Ctx) error {
-	//form, err := c.MultipartForm()
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//age, _ := strconv.Atoi(form.Value["age"][0])
-	//phone, _ := strconv.Atoi(form.Value["phone"][0])
-	//
-	//user := entity.User{
-	//	Username:  form.Value["username"][0],
-	//	Firstname: form.Value["firstname"][0],
-	//	Lastname:  form.Value["lastname"][0],
-	//	Age:       uint(age),
-	//	Phone:     uint(phone),
-	//	Address:   form.Value["address"][0],
-	//	Password:  form.Value["password"][0],
-	//	Ava:       form.Value["avatar"][0],
-	//	Role:      form.Value["role"][0],
-	//}
-
 	var user entity.User
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
@@ -137,23 +118,22 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"message": "User registered successfully",
-		"user":    user,
 	})
 }
 
 func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	var logins login
 	if err := c.BodyParser(&logins); err != nil {
-		return err
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": err})
 	}
 
 	user, err := uh.userUsecase.FindUserByUsername(logins.Username)
 	if err != nil {
-		return c.JSON(fiber.Map{"Error": "User not found"})
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"Error": "User not found"})
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(logins.Password)); err != nil {
-		return c.JSON(fiber.Map{"Error": "Password Error"})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password Error"})
 	}
 
 	accessToken, err := uh.userService.GenerateAccessToken(user)

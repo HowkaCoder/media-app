@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/golang-jwt/jwt"
 	"media-app/internal/app/entity"
 	"time"
@@ -9,6 +10,7 @@ import (
 type UserService interface {
 	GenerateAccessToken(user *entity.User) (string, error)
 	GenerateRefreshToken(user *entity.User) (string, error)
+	ValidateCreateUser(user *entity.User) error
 }
 
 type userService struct{}
@@ -30,6 +32,13 @@ func (s *userService) GenerateAccessToken(user *entity.User) (string, error) {
 	})
 
 	return token.SignedString(entity.SecretKey)
+}
+
+func (s *userService) ValidateCreateUser(user *entity.User) error {
+	if user.Role != "admin" && user.Role != "user" {
+		return errors.New("Role not allowed")
+	}
+	return nil
 }
 
 func (s *userService) GenerateRefreshToken(user *entity.User) (string, error) {

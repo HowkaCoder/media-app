@@ -4,6 +4,7 @@ import (
 	"errors"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/repository"
+	"media-app/internal/app/service"
 )
 
 type UsersUseCase interface {
@@ -17,7 +18,8 @@ type UsersUseCase interface {
 }
 
 type usersUseCase struct {
-	usersRepo repository.UserRepository
+	usersRepo   repository.UserRepository
+	userService service.UserService
 }
 
 func NewUsersUseCase(userRepository repository.UserRepository) *usersUseCase {
@@ -40,6 +42,11 @@ func (uu *usersUseCase) GetUserByID(id uint) (*entity.User, error) {
 }
 
 func (uu *usersUseCase) CreateUser(user *entity.User) error {
+
+	if err := uu.userService.ValidateCreateUser(user); err != nil {
+		return err
+	}
+
 	return uu.usersRepo.CreateUser(user)
 }
 

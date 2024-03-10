@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="a24b08d7-bd95-44d2-a82b-f069d62d92fd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/app/handler/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/handler/users.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/service/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/service/users.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/app/usecase/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/usecase/users.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -78,7 +78,7 @@
       <recent name="$PROJECT_DIR$/internal/app/repository" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build media-app/cmd">
+  <component name="RunManager" selected="Go Test.go test media-app/cmd">
     <configuration name="go build media-app/cmd" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="media-app" />
       <working_directory value="$PROJECT_DIR$" />
@@ -101,8 +101,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build media-app/cmd" />
         <item itemvalue="Go Test.go test media-app/cmd" />
+        <item itemvalue="Go Build.go build media-app/cmd" />
       </list>
     </recent_temporary>
   </component>

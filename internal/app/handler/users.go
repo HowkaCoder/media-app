@@ -101,7 +101,7 @@ func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
 }
 
 func (uh *UsersHandler) Register(c *fiber.Ctx) error {
-	var user entity.User
+	var user *entity.User
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -112,7 +112,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	user.Password = string(hashedPassword)
 
-	if err := uh.userUsecase.CreateUser(&user); err != nil {
+	if err := uh.userUsecase.CreateUser(user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
 	}
 

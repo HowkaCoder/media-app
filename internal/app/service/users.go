@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	errors "errors"
 	"github.com/golang-jwt/jwt"
 	"media-app/internal/app/entity"
 	"time"
@@ -36,7 +36,7 @@ func (s *userService) GenerateAccessToken(user *entity.User) (string, error) {
 
 func (s *userService) ValidateCreateUser(user *entity.User) error {
 	if user.Role != "admin" && user.Role != "user" {
-		return errors.New("Role not allowed")
+		return errors.New("role not allowed")
 	}
 	return nil
 }

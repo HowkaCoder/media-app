@@ -43,11 +43,11 @@ func (uu *usersUseCase) GetUserByID(id uint) (*entity.User, error) {
 
 func (uu *usersUseCase) CreateUser(user *entity.User) error {
 
-	if err := uu.userService.ValidateCreateUser(user); err != nil {
-		return err
+	if user.Role != "admin" && user.Role != "user" {
+		return errors.New("role not allowed")
+	} else {
+		return uu.usersRepo.CreateUser(user)
 	}
-
-	return uu.usersRepo.CreateUser(user)
 }
 
 func (uu *usersUseCase) UpdateUser(user *entity.User, id uint) error {

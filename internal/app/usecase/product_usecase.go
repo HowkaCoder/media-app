@@ -26,12 +26,14 @@ type ProductUseCase interface {
 	GetImagesByProductID(product_id uint) ([]entity.Image, error)
 	GetImageByID(id uint) (*entity.Image, error)
 	DeleteImage(id uint) error
+	UpdateImage(image entity.Image, id uint) error
 
 	// Characteristics - CRUD FUNCTIONS
 
 	CreateCharacteristic(characteristic *entity.Characteristic) error
 	GetCharacteristicsByProductID(product_id uint) ([]entity.Characteristic, error)
 	DeleteCharacteristic(id uint) error
+	UpdateCharacteristic(characteristic entity.Characteristic, id uint) error
 }
 
 type productUseCase struct {
@@ -61,6 +63,10 @@ func (pu *productUseCase) DeleteImage(id uint) error {
 	return pu.productRepo.DeleteImage(id)
 }
 
+func (pu *productUseCase) UpdateImage(image entity.Image, id uint) error {
+	return pu.productRepo.UpdateImage(image, id)
+}
+
 // CHARACTERISTIC FUNCTIONS
 
 func (pu *productUseCase) CreateCharacteristic(characteristic *entity.Characteristic) error {
@@ -69,6 +75,10 @@ func (pu *productUseCase) CreateCharacteristic(characteristic *entity.Characteri
 
 func (pu *productUseCase) GetCharacteristicsByProductID(product_id uint) ([]entity.Characteristic, error) {
 	return pu.productRepo.GetCharacteristicsByProductID(product_id)
+}
+
+func (pu *productUseCase) UpdateCharacteristic(characteristic entity.Characteristic, id uint) error {
+	return pu.productRepo.UpdateCharacteristic(characteristic, id)
 }
 
 func (pu *productUseCase) DeleteCharacteristic(id uint) error {

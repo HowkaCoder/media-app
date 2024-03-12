@@ -113,7 +113,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	user.Password = string(hashedPassword)
 
 	if err := uh.userUsecase.CreateUser(user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 
 	return c.JSON(fiber.Map{

@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type Product struct {
 	gorm.Model
 	ID              uint                  `gorm:"primaryKey"`
-	CategoryID      uint                  `gorm:"not null"`
+	CategoryID      uint                  `gorm:"not null" json:"CategoryID"`
 	Name            string                `gorm:"not null"`
 	Price           uint                  `gorm:"not null"`
 	Discount        uint                  `gorm:"null"`

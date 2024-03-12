@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/usecase"
-	"os"
 	"strconv"
 )
 
@@ -19,22 +17,32 @@ func NewProductHandler(useCase usecase.ProductUseCase) *ProductHandler {
 }
 
 func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
-	// Парсинг | анализирует данные, извлекает из них нужную информацию
-	form, err := c.MultipartForm()
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	// JSON | Эта строка извлекает данные JSON из формы, которые клиент отправил как json.
-	jsonData := form.Value["json"][0]
+	//// Парсинг | анализирует данные, извлекает из них нужную информацию
+	//form, err := c.MultipartForm()
+	//if err != nil {
+	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	//}
+	//
+	//// JSON | Эта строка извлекает данные JSON из формы, которые клиент отправил как json.
+	//jsonData := form.Value["json"][0]
+	//
+	//var request struct {
+	//	Product         entity.Product           `json:"product"`
+	//	Images          []entity.Image           `json:"images"`
+	//	Characteristics []*entity.Characteristic `json:"characteristics"`
+	//}
+	//// Этот блок кода разбирает данные JSON, полученные от клиента, и помещает их в структуру request.
+	//if err := json.Unmarshal([]byte(jsonData), &request); err != nil {
+	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	//}
 
 	var request struct {
 		Product         entity.Product           `json:"product"`
 		Images          []entity.Image           `json:"images"`
 		Characteristics []*entity.Characteristic `json:"characteristics"`
 	}
-	// Этот блок кода разбирает данные JSON, полученные от клиента, и помещает их в структуру request.
-	if err := json.Unmarshal([]byte(jsonData), &request); err != nil {
+
+	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -75,21 +83,13 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
 	}
 
-	form, err := c.MultipartForm()
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-
-	// JSON | Эта строка извлекает данные JSON из формы, которые клиент отправил как json.
-	jsonData := form.Value["json"][0]
-
 	var request struct {
-		Product         entity.Product           `json:"product"`
-		Images          []entity.Image           `json:"images"`
-		Characteristics []*entity.Characteristic `json:"characteristics"`
+		Product         entity.Product          `json:"product"`
+		Images          []entity.Image          `json:"images"`
+		Characteristics []entity.Characteristic `json:"characteristics"`
 	}
-	// Этот блок кода разбирает данные JSON, полученные от клиента, и помещает их в структуру request.
-	if err := json.Unmarshal([]byte(jsonData), &request); err != nil {
+
+	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
@@ -98,48 +98,18 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 
-	// Удвляет стардые фотки
-	oldImages, err := ph.productUsecase.GetImagesByProductID(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-	for _, oldImage := range oldImages {
-		if err := os.Remove(oldImage.Path); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-		}
-
-		if err := ph.productUsecase.DeleteImage(oldImage.ID); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-		}
-	}
-
-	// Удвляет стардые характеристики
-	oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-	for _, oldValue := range oldValues {
-		if err := ph.productUsecase.DeleteCharacteristic(oldValue.ProductID); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-		}
-	}
-
-	// Создает новые фотки
+	// Обновляет  фотки
 	for _, imageFile := range request.Images {
 
-		image := entity.Image{
-			ProductID: request.Product.ID,
-			Path:      imageFile.Path,
-		}
-		if err := ph.productUsecase.CreateImage(&image); err != nil {
+		if err := ph.productUsecase.UpdateImage(imageFile, imageFile.ID); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}
 
 	}
 
-	// УСоздает новые характеристики
+	// Обновляет характеристики
 	for _, Value := range request.Characteristics {
-		if err := ph.productUsecase.CreateCharacteristic(Value); err != nil {
+		if err := ph.productUsecase.UpdateCharacteristic(Value, Value.ID); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		} else {
 			log.Println(Value)
@@ -166,28 +136,29 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 	var err error
 
 	if limit > 0 {
-		products, err = ph.productUsecase.GetProductsWithPagination(limit)
+		//return c.JSON(fiber.Map{"limit": limit})
+		products, err = ph.productUsecase.GetProductsWithPagination(int(limit))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}
 
-	}
-	if minPrice > 0 || maxPrice > 0 {
+	} else if minPrice > 0 || maxPrice > 0 {
 		products, err = ph.productUsecase.GetProductsByPriceRange(uint(minPrice), uint(maxPrice))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
-	}
-	if value != "" || description != "" {
+	} else if value != "" || description != "" {
 		products, err = ph.productUsecase.GetProductsByCharacteristics(value, description)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
-	}
+	} else {
 
-	products, err = ph.productUsecase.GetAllProducts()
-	if err != nil {
-		return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Error": err.Error()})
+		products, err = ph.productUsecase.GetAllProducts()
+		if err != nil {
+			return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Error": err.Error()})
+		}
+
 	}
 	return c.JSON(products)
 }
@@ -200,7 +171,7 @@ func (ph *ProductHandler) GetProductByID(c *fiber.Ctx) error {
 
 	product, err := ph.productUsecase.GetProductByID(uint(id))
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": id})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 	return c.JSON(product)
 }
@@ -216,10 +187,6 @@ func (ph *ProductHandler) DeleteProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	for _, oldImage := range oldImages {
-		if err := os.Remove(oldImage.Path); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-		}
-
 		if err := ph.productUsecase.DeleteImage(oldImage.ID); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 		}
@@ -227,6 +194,7 @@ func (ph *ProductHandler) DeleteProduct(c *fiber.Ctx) error {
 
 	oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(uint(id))
 	if err != nil {
+		
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	for _, oldValue := range oldValues {

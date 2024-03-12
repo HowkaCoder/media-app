@@ -1,15 +1,16 @@
 package internal
 
 import (
+	"gorm.io/gorm"
 	"log"
 	"media-app/internal/app/entity"
 
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	"gorm.io/driver/postgres"
 )
 
 func Init() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("database.db"), &gorm.Config{})
+	dsn := "host=monorail.proxy.rlwy.net user=postgres password=xlsCRByWFYqwvqBIrVHkkAvFBWkaqHLJ dbname=railway port=31045"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}

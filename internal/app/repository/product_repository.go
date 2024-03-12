@@ -26,12 +26,13 @@ type ProductRepository interface {
 	GetImageByID(id uint) (*entity.Image, error)
 	GetImagesByProductID(product_id uint) ([]entity.Image, error)
 	DeleteImage(id uint) error
-
+	UpdateImage(image entity.Image, id uint) error
 	// Characteristics - CRUD FUNCTIONS
 
 	CreateCharacteristic(characteristic *entity.Characteristic) error
 	GetCharacteristicsByProductID(product_id uint) ([]entity.Characteristic, error)
 	DeleteCharacteristic(id uint) error
+	UpdateCharacteristic(characteristic entity.Characteristic, id uint) error
 }
 
 type productRepository struct {
@@ -54,6 +55,19 @@ func (pr *productRepository) GetImagesByProductID(product_id uint) ([]entity.Ima
 		return nil, err
 	}
 	return images, nil
+}
+
+func (pr *productRepository) UpdateImage(image entity.Image, id uint) error {
+	var Eimage entity.Image
+	if err := pr.db.First(&Eimage, id).Error; err != nil {
+		return err
+	}
+
+	if image.Path != "" {
+		Eimage.Path = image.Path
+	}
+
+	return pr.db.Save(&Eimage).Error
 }
 
 func (pr *productRepository) GetImageByID(id uint) (*entity.Image, error) {
@@ -99,6 +113,22 @@ func (pr *productRepository) DeleteCharacteristic(id uint) error {
 	}
 	return pr.db.Delete(&characteristic).Error
 
+}
+
+func (pr *productRepository) UpdateCharacteristic(characteristic entity.Characteristic, id uint) error {
+	var Echar entity.Characteristic
+	if err := pr.db.First(&Echar, id).Error; err != nil {
+		return err
+	}
+
+	if characteristic.Value != "" {
+		Echar.Value = characteristic.Value
+	}
+	if characteristic.Description != "" {
+		Echar.Description = characteristic.Description
+	}
+
+	return pr.db.Save(&Echar).Error
 }
 
 // PRODUCT FUNCTIONS
@@ -204,6 +234,9 @@ func (pr *productRepository) GetProductsByCharacteristics(value, description str
 		Joins("JOIN characteristics ON products.id = characteristics.product_id").
 		Where("value = ? AND description = ?", value, description).
 		Preload("Translations").
+		Preload("Category").
+		Preload("Images").
+		Preload("Characteristics").
 		Find(&products).
 		Error; err != nil {
 		return nil, err

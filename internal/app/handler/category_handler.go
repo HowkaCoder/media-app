@@ -67,16 +67,16 @@ func (h *categoryHandler) DeleteCategory(c *fiber.Ctx) error {
 func (h *categoryHandler) UpdateCategory(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return err
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error 1": err.Error()})
 	}
 
 	var category entity.Category
 	if err := c.BodyParser(&category); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 2": err.Error()})
 	}
 
 	if err := h.categoryUseCase.UpdateCategory(&category, uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 3": err.Error()})
 	}
 	return c.JSON(fiber.Map{"message": "updated successfully"})
 }

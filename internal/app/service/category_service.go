@@ -35,7 +35,7 @@ func (s *categoryService) ValidateCategory(category *entity.Category) error {
 }
 
 func (s *categoryService) ValidateCategoryByUpdate(category *entity.Category, id uint) error {
-	if id == category.ParentCategoryID {
+	if id == *category.ParentCategoryID {
 		return errors.New("Parent Category iD cannot be as a category ID !!!")
 	}
 

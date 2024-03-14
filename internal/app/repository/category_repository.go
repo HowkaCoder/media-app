@@ -50,19 +50,16 @@ func (r *categoryRepository) GetSingleCategory(id uint) (*entity.Category, error
 func (r *categoryRepository) CreateCategory(category *entity.Category) error {
 
 	// Проверка на наличие родительсокй категории
-	if category.ParentCategoryID != 0 {
-		parentCategory, err := r.GetSingleCategory(category.ParentCategoryID)
-		if err != nil {
-			return err
-		}
-		if parentCategory == nil {
+	if category.ParentCategoryID != nil {
+
+		parentCategory := &entity.Category{ID: *category.ParentCategoryID}
+		if err := r.db.First(parentCategory).Error; err != nil {
 			return errors.New("Parent category does not exist")
 		}
-
 		category.Level = parentCategory.Level + 1
 	}
 
-	if category.ParentCategoryID == 0 {
+	if category.ParentCategoryID == nil {
 		category.Level = 1
 	}
 
@@ -95,8 +92,12 @@ func (r *categoryRepository) UpdateCategory(id uint, category *entity.Category) 
 	if category.NameUZ != "" {
 		eCategory.NameUZ = category.NameUZ
 	}
-	if category.ParentCategoryID != 0 {
-		eCategory.ParentCategoryID = category.ParentCategoryID
+	if category.ParentCategoryID != nil {
+		if *category.ParentCategoryID != eCategory.ID {
+			eCategory.ParentCategoryID = category.ParentCategoryID
+		} else {
+			return errors.New("You just cant change it bro!")
+		}
 	}
 
 	return r.db.Save(&eCategory).Error

@@ -202,7 +202,7 @@ func (pr *productRepository) DeleteProduct(id uint) error {
 
 func (pr *productRepository) GetProductsByCategoryID(id uint) ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Where("category_id = ?", id).Preload("Translations").Find(&products); err != nil {
+	if err := pr.db.Where("category_id = ?", id).Preload("Translations").Preload("Category").Preload("Images").Preload("Characteristics").Find(&products); err != nil {
 
 	}
 	return products, nil

@@ -1,63 +1,65 @@
 package internal
 
 import (
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"media-app/internal/app/entity"
-
-	"gorm.io/driver/postgres"
 )
 
+var DB *gorm.DB
+
 func Init() *gorm.DB {
-	dsn := "host=monorail.proxy.rlwy.net user=postgres password=xlsCRByWFYqwvqBIrVHkkAvFBWkaqHLJ dbname=railway port=31045"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	var err error
+	dsn := "root:pBaYLMKHIVQFHPBbbRKAfphLmzReYKSu@tcp(roundhouse.proxy.rlwy.net:39674)/railway?charset=utf8mb4&parseTime=True&loc=Local"
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.Category{})
+	err = DB.AutoMigrate(&entity.Category{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.Image{})
+	err = DB.AutoMigrate(&entity.Image{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.Characteristic{})
+	err = DB.AutoMigrate(&entity.Characteristic{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.Product{})
+	err = DB.AutoMigrate(&entity.Product{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.Language{})
+	err = DB.AutoMigrate(&entity.Language{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.ProductTranslations{})
+	err = DB.AutoMigrate(&entity.ProductTranslations{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.CharacteristicTranslation{})
+	err = DB.AutoMigrate(&entity.CharacteristicTranslation{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.User{})
+	err = DB.AutoMigrate(&entity.User{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.AutoMigrate(&entity.JWTCredentials{})
+	err = DB.AutoMigrate(&entity.JWTCredentials{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	return db
+	return DB
 }

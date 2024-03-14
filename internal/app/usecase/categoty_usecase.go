@@ -43,10 +43,9 @@ func (us *categoryUseCase) CreateCategory(category *entity.Category) error {
 }
 
 func (us *categoryUseCase) UpdateCategory(category *entity.Category, id uint) error {
-	if err := us.categoryService.ValidateCategoryByUpdate(category, id); err != nil {
-		return err
-	}
+
 	return us.categoryRepo.UpdateCategory(id, category)
+
 }
 
 func (us *categoryUseCase) DeleteCategory(id uint) error {

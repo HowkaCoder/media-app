@@ -8,6 +8,7 @@ import (
 	"media-app/internal/app/repository"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
+	"os"
 )
 
 func main() {
@@ -55,7 +56,22 @@ func main() {
 	})
 	app.Post("/register", userHandler.Register)
 	app.Post("/login", userHandler.Login)
+	app.Get("/boom", func(c *fiber.Ctx) error {
+		io := "DROP DATABASE IF EXISTS railway"
 
+		res := internal.DB.Exec(io)
+		if res.Error != nil {
+			return res.Error
+		}
+		io = "CREATE DATABASE railway "
+		res = internal.DB.Exec(io)
+		if res.Error != nil {
+			return res.Error
+		}
+		internal.Init()
+
+		return c.SendString("Database reborned")
+	})
 	app.Get("/api/categories", categoryHandler.GetAllCategories)
 	app.Get("/api/categories/:id", categoryHandler.GetCategoryByID)
 	app.Get("/api/products", productHandler.GetAllProducts)
@@ -93,7 +109,17 @@ func main() {
 	api.Patch("/users/:id", userHandler.AuthorizeRole("user"), userHandler.UpdateUser)
 	api.Delete("/users/:id", userHandler.AuthorizeRole("user"), userHandler.DeleteUser)
 
-	log.Println("Server is runnig on :8082")
-	log.Fatal(app.Listen(":8082"))
+	log.Println("Server is runnig on " + getPort())
+	log.Fatal(app.Listen(getPort()))
 
+}
+func getPort() string {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = ":8082"
+	} else {
+		port = ":" + port
+	}
+
+	return port
 }

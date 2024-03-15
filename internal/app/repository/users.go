@@ -33,7 +33,7 @@ func (ur *userRepository) FindUserByUsername(username string) (*entity.User, err
 
 func (ur *userRepository) GetAllUsers() ([]entity.User, error) {
 	var users []entity.User
-	if err := ur.db.Preload("Ava").Find(&users).Error; err != nil {
+	if err := ur.db.Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil

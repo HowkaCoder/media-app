@@ -3,6 +3,7 @@ package entity
 import (
 	"github.com/golang-jwt/jwt"
 	"gorm.io/gorm"
+	"time"
 )
 
 var (
@@ -11,16 +12,19 @@ var (
 
 type User struct {
 	gorm.Model
-	ID        uint   `gorm:"primaryKey"`
-	Username  string `gorm:"not null, unique"`
-	Firstname string `gorm:"not null"`
-	Lastname  string `gorm:"not null"`
-	Age       uint   `gorm:"not null"`
-	Phone     uint   `gorm:"not null , unique"`
-	Address   string `gorm:"not null"`
-	Password  string `gorm:"not null"`
-	Role      string `gorm:"not null"`
-	Ava       string `gorm:"not null"`
+	ID        uint           ` gorm:"primaryKey ; column:id" json:"id"`
+	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt time.Time      `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
+	Username  string         `gorm:"not null, unique" json:"username"`
+	Firstname string         `gorm:"not null" json:"firstname"`
+	Lastname  string         `gorm:"not null" json:"lastname"`
+	Age       uint           `gorm:"not null" json:"age"`
+	Phone     uint           `gorm:"not null , unique" json:"phone"`
+	Address   string         `gorm:"not null" json:"address"`
+	Password  string         `gorm:"not null" json:"password"`
+	Role      string         `gorm:"not null" json:"role"`
+	Ava       string         `gorm:"not null" json:"ava"`
 }
 
 type JWTCredentials struct {

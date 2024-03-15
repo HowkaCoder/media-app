@@ -105,7 +105,7 @@ func main() {
 	api.Delete("/translations/characteristic/:id", userHandler.AuthorizeRole("admin"), translationHandler.DeleteCharacteristicTranslation)
 
 	api.Get("/users", userHandler.AuthorizeRole("admin"), userHandler.GetAllUsers)
-	api.Get("/users/:id", userHandler.AuthorizeRole("user"), userHandler.GetUserByID)
+	api.Get("/users/:id", userHandler.GetUserByID)
 	api.Patch("/users/:id", userHandler.AuthorizeRole("user"), userHandler.UpdateUser)
 	api.Delete("/users/:id", userHandler.AuthorizeRole("user"), userHandler.DeleteUser)
 

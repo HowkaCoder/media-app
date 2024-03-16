@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"log"
 	"media-app/internal"
@@ -9,6 +10,7 @@ import (
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -44,6 +46,17 @@ func main() {
 	userHandler := handler.NewUserHandler(userUsecase, userService)
 
 	app := fiber.New()
+
+	// Получаем абсолютный путь к папке images
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Ошибка при получении текущей директории:", err)
+		return
+	}
+	imagesDir := filepath.Join(currentDir, "images")
+
+	// Статический обработчик для папки с изображениями
+	app.Static("/images", imagesDir)
 	app.Use(func(c *fiber.Ctx) error {
 		c.Set("Access-Control-Allow-Origin", "*")
 		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
@@ -63,6 +65,28 @@ func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
 	age, _ := strconv.Atoi(form.Value["age"][0])
 	phone, _ := strconv.Atoi(form.Value["phone"][0])
 
+	file, err := c.FormFile("ava")
+
+	if err != nil {
+		log.Println("Error in uploading Image : ", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+
+	}
+
+	uniqueId := uuid.New()
+
+	filename := strings.Replace(uniqueId.String(), "-", "", -1)
+
+	fileExt := strings.Split(file.Filename, ".")[1]
+
+	image := fmt.Sprintf("%s.%s", filename, fileExt)
+
+	err = c.SaveFile(file, fmt.Sprintf("./images/%s", image))
+
+	if err != nil {
+		log.Println("Error in saving Image :", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+	}
 	user := &entity.User{
 		Username:  form.Value["username"][0],
 		Firstname: form.Value["firstname"][0],
@@ -71,7 +95,7 @@ func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
 		Phone:     uint(phone),
 		Address:   form.Value["address"][0],
 		Password:  form.Value["password"][0],
-		Ava:       form.Value["avatar"][0],
+		Ava:       fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image),
 		Role:      form.Value["role"][0],
 	}
 
@@ -101,7 +125,31 @@ func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
 }
 
 func (uh *UsersHandler) Register(c *fiber.Ctx) error {
-	var user *entity.User
+
+	file, err := c.FormFile("ava")
+
+	if err != nil {
+		log.Println("Error in uploading Image : ", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+
+	}
+
+	uniqueId := uuid.New()
+
+	filename := strings.Replace(uniqueId.String(), "-", "", -1)
+
+	fileExt := strings.Split(file.Filename, ".")[1]
+
+	image := fmt.Sprintf("%s.%s", filename, fileExt)
+
+	err = c.SaveFile(file, fmt.Sprintf("./images/%s", image))
+
+	if err != nil {
+		log.Println("Error in saving Image :", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+	}
+
+	var user entity.User
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -112,7 +160,9 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	user.Password = string(hashedPassword)
 
-	if err := uh.userUsecase.CreateUser(user); err != nil {
+	user.Ava = fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image)
+
+	if err := uh.userUsecase.CreateUser(&user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 

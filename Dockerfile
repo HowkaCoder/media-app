@@ -7,13 +7,9 @@ WORKDIR /app
 # Copy all files from the current directory (.) into the working directory (/app) inside the container
 COPY . .
 
-# Copy the database file into the container
-COPY ./database/database.db ./cmd/database/database.db
-
-
 
 # Build your application (assuming main.go is located inside the cmd directory)
-RUN go build -o main ./cmd
+RUN go build -o main . 
 
 # Expose the port that your application will use
 EXPOSE 8082

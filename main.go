@@ -45,7 +45,9 @@ func main() {
 	userUsecase := usecase.NewUsersUseCase(userRepository)
 	userHandler := handler.NewUserHandler(userUsecase, userService)
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		BodyLimit: 100 * 1024 * 1024,
+	})
 
 	// Получаем абсолютный путь к папке images
 	currentDir, err := os.Getwd()

@@ -153,12 +153,12 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-
-	user.Password = string(hashedPassword)
+	//hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//user.Password = string(hashedPassword)
 
 	user.Ava = fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image)
 
@@ -182,10 +182,13 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{"Error": "User not found"})
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(logins.Password)); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password doesnt exists"})
-	}
+	//if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(logins.Password)); err != nil {
+	//	return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password doesnt exists"})
+	//}
 
+	if user.Password != logins.Password {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password Error"})
+	}
 	accessToken, err := uh.userService.GenerateAccessToken(user)
 	if err != nil {
 		return err
@@ -236,4 +239,29 @@ func (uh *UsersHandler) AuthorizeRole(role string) fiber.Handler {
 		}
 		return c.Next()
 	}
+}
+
+func (uh *UsersHandler) GetUserProfile(c *fiber.Ctx) error {
+	authHeader := c.Get("Authorization")
+	if authHeader == "" {
+		return fiber.ErrUnauthorized
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	token, err := jwt.ParseWithClaims(tokenString, &entity.JWTCredentials{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return entity.SecretKey, nil
+	})
+	if err != nil {
+		return fiber.ErrUnauthorized
+	}
+
+	if claims, ok := token.Claims.(*entity.JWTCredentials); ok && token.Valid {
+		
+		return c.JSON(fiber.Map{"claims": claims})
+	}
+
+	return fiber.ErrUnauthorized
 }

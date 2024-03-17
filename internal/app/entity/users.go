@@ -35,5 +35,7 @@ type JWTCredentials struct {
 	Lastname  string `json:"lastname"`
 	Age       uint   `json:"age"`
 	Address   string `json:"address"`
+	Password  string `json:"password"`
+	Ava       string `json:"ava"`
 	jwt.StandardClaims
 }

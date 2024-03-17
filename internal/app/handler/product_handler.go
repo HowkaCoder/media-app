@@ -8,6 +8,7 @@ import (
 	"media-app/internal/app/entity"
 	"media-app/internal/app/usecase"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -202,9 +203,9 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	}
 
 	var request struct {
-		Product         entity.Product          `json:"product"`
-		Images          []entity.Image          `json:"images"`
-		Characteristics []entity.Characteristic `json:"characteristics"`
+		Product         entity.Product           `json:"product"`
+		Images          []*entity.Image          `json:"images"`
+		Characteristics []*entity.Characteristic `json:"characteristics"`
 	}
 
 	if err := c.BodyParser(&request); err != nil {
@@ -227,7 +228,10 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	for _, oldImage := range oldImages {
-		if err := os.Remove(oldImage.Path); err != nil {
+		path := strings.Split(oldImage.Path, "/")
+		oldPath := filepath.Join(path[3], path[4])
+		log.Println(oldPath)
+		if err := os.Remove(oldPath); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}
 
@@ -262,12 +266,12 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 			return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
 		}
 
-		Image := entity.Image{
+		Image := &entity.Image{
 			ProductID: request.Product.ID,
 			Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image),
 		}
 
-		if err := ph.productUsecase.CreateImage(&Image); err != nil {
+		if err := ph.productUsecase.CreateImage(Image); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		} else {
 			log.Println(request.Product.ID)
@@ -276,7 +280,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	}
 
 	for _, Value := range request.Characteristics {
-		if err := ph.productUsecase.CreateCharacteristic(&Value); err != nil {
+		if err := ph.productUsecase.CreateCharacteristic(Value); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		} else {
 			log.Println(Value)

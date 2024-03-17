@@ -270,7 +270,6 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 			ProductID: request.Product.ID,
 			Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image),
 		}
-
 		if err := ph.productUsecase.CreateImage(&Image); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		} else {

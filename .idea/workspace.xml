@@ -6,12 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="a24b08d7-bd95-44d2-a82b-f069d62d92fd" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/1038422235004db1be1b8e761d0b5d5e.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/f85024b46f474d19803ce1d680a60125.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/app/entity/product_entity.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/entity/product_entity.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/app/handler/product_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/handler/product_handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/app/repository/product_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/repository/product_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/app/service/product_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/service/product_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/entity/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/entity/users.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/handler/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/handler/users.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/repository/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/repository/users.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/service/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/service/users.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

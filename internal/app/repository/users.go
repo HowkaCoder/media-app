@@ -41,7 +41,7 @@ func (ur *userRepository) GetAllUsers() ([]entity.User, error) {
 
 func (ur *userRepository) GetUserByID(id uint) (*entity.User, error) {
 	var user *entity.User
-	if err := ur.db.Preload("Ava").First(&user, id).Error; err != nil {
+	if err := ur.db.First(&user, id).Error; err != nil {
 		return nil, err
 	}
 	return user, nil

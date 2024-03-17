@@ -144,6 +144,7 @@ func (pr *productRepository) UpdateProduct(product entity.Product, id uint) erro
 			errors.New("Record not found")
 		}
 	}
+
 	if product.CategoryID != nil {
 		if product.CategoryID != eProduct.CategoryID {
 			eProduct.CategoryID = product.CategoryID

@@ -104,7 +104,10 @@ func (pu *productUseCase) GetAllProducts() ([]entity.Product, error) {
 
 func (pu *productUseCase) UpdateProduct(product entity.Product, id uint) error {
 
-	pu.productService.ValidateProduct(&product)
+	err := pu.productService.ValidateProduct(product)
+	if err != nil {
+		return err
+	}
 
 	return pu.productRepo.UpdateProduct(product, id)
 }

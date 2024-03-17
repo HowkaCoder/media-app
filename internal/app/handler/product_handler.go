@@ -96,16 +96,13 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	if err := ph.productUsecase.CreateProduct(&request.Product); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
-
 	form, err := c.MultipartForm()
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	images := form.File["images[]"]
 
 	for _, imageFile := range images {
@@ -128,7 +125,6 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 			ProductID: request.Product.ID,
 			Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image),
 		}
-
 		if err := ph.productUsecase.CreateImage(&Image); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		} else {
@@ -136,6 +132,7 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 		}
 
 	}
+
 	for _, chars := range request.Characteristics {
 		chars.ProductID = request.Product.ID
 		log.Println(chars)
@@ -146,6 +143,8 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 		log.Println(chars)
 
 	}
+
+	//return c.JSON(fiber.Map{"request": request})
 	return c.JSON(fiber.Map{"message": "Successfully Created"})
 
 }

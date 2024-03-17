@@ -142,7 +142,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	image := fmt.Sprintf("%s.%s", filename, fileExt)
 
-	err = c.SaveFile(file, fmt.Sprintf("./images/%s", image))
+	err = c.SaveFile(file, fmt.Sprintf("././images/%s", image))
 
 	if err != nil {
 		log.Println("Error in saving Image :", err)
@@ -259,7 +259,7 @@ func (uh *UsersHandler) GetUserProfile(c *fiber.Ctx) error {
 	}
 
 	if claims, ok := token.Claims.(*entity.JWTCredentials); ok && token.Valid {
-		
+
 		return c.JSON(fiber.Map{"claims": claims})
 	}
 

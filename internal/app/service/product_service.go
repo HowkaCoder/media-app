@@ -6,7 +6,7 @@ import (
 )
 
 type ProductService interface {
-	ValidateProduct(product entity.Product) error
+	ValidateProduct(product *entity.Product) error
 }
 
 type productService struct {
@@ -17,7 +17,7 @@ func NewProductService(categoryRepository repository.CategoryRepository) *produc
 	return &productService{categoryRepo: categoryRepository}
 }
 
-func (ps *productService) ValidateProduct(product entity.Product) error {
+func (ps *productService) ValidateProduct(product *entity.Product) error {
 
 	err := ps.categoryRepo.GetExsistCategory(product.CategoryID)
 	if err != nil {

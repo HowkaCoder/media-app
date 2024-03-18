@@ -211,8 +211,9 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+	//return c.JSON(fiber.Map{"id": id, "request": request, "product": request.Product})
 
-	if err := ph.productUsecase.UpdateProduct(request.Product, uint(id)); err != nil {
+	if err := ph.productUsecase.UpdateProduct(&request.Product, uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 
@@ -273,7 +274,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		if err := ph.productUsecase.CreateImage(&Image); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		} else {
-			log.Println(request.Product.ID)
+			log.Println(request)
 		}
 
 	}

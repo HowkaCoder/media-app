@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a24b08d7-bd95-44d2-a82b-f069d62d92fd" name="Changes" comment="" />
+    <list default="true" id="a24b08d7-bd95-44d2-a82b-f069d62d92fd" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/f8c37dac940f4e6a8869f7a0e5f3d95b.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/handler/product_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/handler/product_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/repository/product_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/repository/product_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/service/product_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/service/product_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/usecase/product_usecase.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/usecase/product_usecase.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

@@ -17,7 +17,7 @@ type ProductUseCase interface {
 	GetProductsWithPagination(limit int) ([]entity.Product, error)
 	GetProductByID(id uint) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
-	UpdateProduct(product entity.Product, id uint) error
+	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
 
 	// IMAGE - CRUD FUNCTIONS
@@ -102,7 +102,7 @@ func (pu *productUseCase) GetAllProducts() ([]entity.Product, error) {
 	return pu.productRepo.GetAllProducts()
 }
 
-func (pu *productUseCase) UpdateProduct(product entity.Product, id uint) error {
+func (pu *productUseCase) UpdateProduct(product *entity.Product, id uint) error {
 
 	err := pu.productService.ValidateProduct(product)
 	if err != nil {

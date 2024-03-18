@@ -17,7 +17,7 @@ type ProductRepository interface {
 	GetProductsWithPagination(limit int) ([]entity.Product, error)
 	GetProductByID(id uint) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
-	UpdateProduct(product entity.Product, id uint) error
+	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
 
 	// IMAGE - CRUD FUNCTIONS
@@ -137,8 +137,8 @@ func (pr *productRepository) CreateProduct(product *entity.Product) error {
 	return pr.db.Create(product).Error
 }
 
-func (pr *productRepository) UpdateProduct(product entity.Product, id uint) error {
-	var eProduct entity.Product
+func (pr *productRepository) UpdateProduct(product *entity.Product, id uint) error {
+	var eProduct *entity.Product
 	if err := pr.db.First(&eProduct, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			errors.New("Record not found")

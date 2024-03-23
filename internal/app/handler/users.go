@@ -11,6 +11,7 @@ import (
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -136,15 +137,26 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	}
 
 	uniqueId := uuid.New()
-
 	filename := strings.Replace(uniqueId.String(), "-", "", -1)
-
 	fileExt := strings.Split(file.Filename, ".")[1]
-
 	image := fmt.Sprintf("%s.%s", filename, fileExt)
 
-	err = c.SaveFile(file, fmt.Sprintf("./images/%s", image))
+	// Get absolute path to the images folder
+	imagesDir, err := os.Getwd()
+	if err != nil {
+		log.Println("Error getting working directory:", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+	}
+	imagesDir = fmt.Sprintf("%s/images", imagesDir)
 
+	// Create the images folder if it doesn't exist
+	if err := os.MkdirAll(imagesDir, os.ModePerm); err != nil {
+		log.Println("Error creating images folder:", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+	}
+
+	// Save the image
+	err = c.SaveFile(file, fmt.Sprintf("%s/%s", imagesDir, image))
 	if err != nil {
 		log.Println("Error in saving Image :", err, " image ", image)
 		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})

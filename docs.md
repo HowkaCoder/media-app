@@ -284,26 +284,26 @@ POST /products
 ```
 **Request Body**
 ```json
-{
-"product": {
-"name": "New Product",
-"price": 150,
-"discount": 0,
-"quantity": 20,
-"category_id": 1
-},
-"images": [
-{
-"path": "/uploads/photo/new_product.jpg"
-}
-],
-"characteristics": [
-{
-"value": "New Value",
-"description": "New Description"
-}
-]
-}
+    {
+    "product": {
+    "name": "New Product",
+    "price": 150,
+    "discount": 0,
+    "quantity": 20,
+    "category_id": 1
+    },
+    "images": [
+    {
+    "path": "/uploads/photo/new_product.jpg"
+    }
+    ],
+    "characteristics": [
+    {
+    "value": "New Value",
+    "description": "New Description"
+    }
+    ]
+    }
 ```
 **Response**
 ```json

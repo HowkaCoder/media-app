@@ -16,11 +16,11 @@ type Product struct {
 	Price      uint           `gorm:"not null" json:"price"`
 	Discount   uint           `gorm:"null" json:"discount"`
 	Quantity   uint           `gorm:"not null" json:"quantity"`
-	Category   Category       `gorm:"foreignKey:CategoryID"`
+	Category   Category       `gorm:"foreignKey:CategoryID" json:"category"`
 
-	Images          []Image               `gorm:"foreignKey:ProductID"`
-	Characteristics []Characteristic      `gorm:"foreignKey:ProductID"`
-	Translations    []ProductTranslations `gorm:"foreignKey:ProductID"`
+	Images          []Image               `json:"images" gorm:"foreignKey:ProductID"`
+	Characteristics []Characteristic      `json:"characteristics" gorm:"foreignKey:ProductID"`
+	Translations    []ProductTranslations `json:"translations" gorm:"foreignKey:ProductID"`
 }
 
 type Characteristic struct {

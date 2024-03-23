@@ -143,10 +143,10 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	image := fmt.Sprintf("%s.%s", filename, fileExt)
 
-	err = c.SaveFile(file, fmt.Sprintf("./images/%s", image))
+	err = c.SaveFile(file, fmt.Sprintf("././images/%s", image))
 
 	if err != nil {
-		log.Println("Error in saving Image :", err)
+		log.Println("Error in saving Image :", err, " image ", image)
 		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
 	}
 

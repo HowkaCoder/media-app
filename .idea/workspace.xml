@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a24b08d7-bd95-44d2-a82b-f069d62d92fd" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/internal/app/entity/product_entity.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/entity/product_entity.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/d96758baf5d441d8b3e90d582948f7a0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/f3990759c508493ebdfd5681eec07b61.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/app/handler/product_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/app/handler/product_handler.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +138,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-gosdk-2946fb9b3188-155fe4b6e3a0-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-233.14475.38" />
+        <option value="bundled-gosdk-2946fb9b3188-155fe4b6e3a0-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-233.15026.17" />
       </set>
     </attachedChunks>
   </component>

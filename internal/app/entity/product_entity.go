@@ -29,7 +29,7 @@ type Characteristic struct {
 	CreatedAt   time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at" json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
-	ProductID   *uint          `gorm:"not null" json:"product_id"`
+	ProductID   uint           `gorm:"not null" json:"product_id"`
 	Value       string         `gorm:"not null" json:"value"`
 	Description string         `gorm:"not null" json:"description"`
 

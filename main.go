@@ -48,16 +48,16 @@ func main() {
 	app := fiber.New(fiber.Config{
 		BodyLimit: 100 * 1024 * 1024,
 	})
-	app.Use(func(c *fiber.Ctx) error {
-		c.Set("Access-Control-Allow-Origin", "*")
-		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		c.Set("Access-Control-Allow-Credentials", "true")
-		if c.Method() == "OPTIONS" {
-			return c.SendStatus(fiber.StatusNoContent)
-		}
-		return c.Next()
-	})
+	//app.Use(func(c *fiber.Ctx) error {
+	//	c.Set("Access-Control-Allow-Origin", "*")
+	//	c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+	//	c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	//	c.Set("Access-Control-Allow-Credentials", "true")
+	//	if c.Method() == "OPTIONS" {
+	//		return c.SendStatus(fiber.StatusNoContent)
+	//	}
+	//	return c.Next()
+	//})
 	// Получаем абсолютный путь к папке images
 	currentDir, err := os.Getwd()
 	if err != nil {

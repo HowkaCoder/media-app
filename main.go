@@ -48,17 +48,6 @@ func main() {
 	app := fiber.New(fiber.Config{
 		BodyLimit: 100 * 1024 * 1024,
 	})
-
-	// Получаем абсолютный путь к папке images
-	currentDir, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Ошибка при получении текущей директории:", err)
-		return
-	}
-	imagesDir := filepath.Join(currentDir, "images")
-
-	// Статический обработчик для папки с изображениями
-	app.Static("/images", imagesDir)
 	app.Use(func(c *fiber.Ctx) error {
 		c.Set("Access-Control-Allow-Origin", "*")
 		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
@@ -69,6 +58,17 @@ func main() {
 		}
 		return c.Next()
 	})
+	// Получаем абсолютный путь к папке images
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Ошибка при получении текущей директории:", err)
+		return
+	}
+	imagesDir := filepath.Join(currentDir, "images")
+
+	// Статический обработчик для папки с изображениями
+	app.Static("/images", imagesDir)
+
 	app.Post("/register", userHandler.Register)
 	app.Post("/login", userHandler.Login)
 	app.Get("/boom", func(c *fiber.Ctx) error {

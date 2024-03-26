@@ -12,7 +12,7 @@ type CategoryRepository interface {
 	CreateCategory(category *entity.Category) error
 	UpdateCategory(id uint, category *entity.Category) error
 	DeleteCategory(id uint) error
-	GetExsistCategory(id *uint) error
+	GetExCategory(id *uint) error
 	GetCategoriesWithPagination(limit, offset int) ([]entity.Category, error)
 }
 
@@ -34,7 +34,7 @@ func (r *categoryRepository) GetAllCategories() ([]entity.Category, error) {
 	return categories, nil
 }
 
-func (r *categoryRepository) GetExsistCategory(id *uint) error {
+func (r *categoryRepository) GetExCategory(id *uint) error {
 	var category *entity.Category
 
 	if err := r.db.Where("id = ?", uint(*id)).First(&category, id).Error; err != nil {

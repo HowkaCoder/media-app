@@ -19,7 +19,7 @@ func NewProductService(categoryRepository repository.CategoryRepository) *produc
 
 func (ps *productService) ValidateProduct(product *entity.Product) error {
 
-	err := ps.categoryRepo.GetExsistCategory(product.CategoryID)
+	err := ps.categoryRepo.GetExCategory(product.CategoryID)
 	if err != nil {
 		return err
 	}

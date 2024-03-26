@@ -37,7 +37,7 @@ func (r *categoryRepository) GetAllCategories() ([]entity.Category, error) {
 func (r *categoryRepository) GetExCategory(id *uint) error {
 	var category *entity.Category
 
-	if err := r.db.Where("id = ?", uint(*id)).First(&category, id).Error; err != nil {
+	if err := r.db.Where("id = ?", id).First(&category, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return err
 		}

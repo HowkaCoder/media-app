@@ -141,7 +141,7 @@ func (pr *productRepository) UpdateProduct(product *entity.Product, id uint) err
 	var eProduct *entity.Product
 	if err := pr.db.First(&eProduct, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			errors.New("Record not found")
+			errors.New("Product not found")
 		}
 	}
 

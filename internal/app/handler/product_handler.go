@@ -47,7 +47,9 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 	}
 
 	for _, image := range request.Images {
-		decodedImage, err := base64.StdEncoding.DecodeString(image.Path)
+		path := strings.Split(image.Path, ",")
+		log.Println("path[1]   ", path[1])
+		decodedImage, err := base64.StdEncoding.DecodeString(path[1])
 
 		log.Println("decoded image ", decodedImage)
 		if err != nil {
@@ -160,7 +162,9 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	}
 
 	for _, image := range request.Images {
-		decodedImage, err := base64.StdEncoding.DecodeString(image.Path)
+		path := strings.Split(image.Path, ",")
+		log.Println("path[1]   ", path[1])
+		decodedImage, err := base64.StdEncoding.DecodeString(path[1])
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 6": err.Error()})
 		}

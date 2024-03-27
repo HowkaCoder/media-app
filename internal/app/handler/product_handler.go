@@ -39,7 +39,6 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	log.Println("request ", request)
 
 	// создает Product
 	if err := ph.productUsecase.CreateProduct(&request.Product); err != nil {

@@ -127,6 +127,8 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 1": err.Error()})
 	}
+
+	log.Println(request)
 	//return c.JSON(fiber.Map{"id": id, "request": request, "product": request.Product})
 
 	if err := ph.productUsecase.UpdateProduct(&request.Product, uint(id)); err != nil {
@@ -160,8 +162,9 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		}
 	}
 
-	log.Println("request.Images     ", request.Images )
+	log.Println(request.Images)
 	for _, image := range request.Images {
+		log.Println("image ", image)
 		path := strings.Split(image.Path, ",")
 		log.Println("path[1]   ", path[1])
 		decodedImage, err := base64.StdEncoding.DecodeString(path[1])

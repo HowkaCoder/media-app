@@ -160,12 +160,15 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		}
 	}
 
+	log.Println("request.Images     ", request.Images )
 	for _, image := range request.Images {
 		path := strings.Split(image.Path, ",")
 		log.Println("path[1]   ", path[1])
 		decodedImage, err := base64.StdEncoding.DecodeString(path[1])
+
+		log.Println("decoded image ", decodedImage)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 6": err.Error()})
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 		}
 		var imageFormat string
 		switch {
@@ -183,12 +186,14 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Unsupported image format"})
 		}
 		fileName := uuid.New().String() + imageFormat
+		log.Println("filename ", fileName)
 		file, err := os.Create("images/" + fileName)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 		defer file.Close()
 
+		log.Println("file ", file)
 		if _, err := file.Write(decodedImage); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
@@ -197,6 +202,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 			ProductID: request.Product.ID,
 			Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
 		}
+		log.Println("image ", image)
 
 		if err := ph.productUsecase.CreateImage(&image); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})

@@ -318,6 +318,7 @@ if err := ph.productUsecase.CreateImage(&image); err != nil {
   }
 */
   for _, Value := range request.Characteristics {
+    Value.ProductID = request.Product.ID
     if err := ph.productUsecase.CreateCharacteristic(Value); err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
     } else {

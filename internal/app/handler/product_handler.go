@@ -264,7 +264,7 @@ if err := ph.productUsecase.CreateImage(&image); err != nil {
     }
   }
 */
-  oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
+ /* oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
   if err != nil {
     return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 4 ": err.Error()})
   }
@@ -273,7 +273,7 @@ if err := ph.productUsecase.CreateImage(&image); err != nil {
       return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 5 ": err.Error()})
     }
   }
-
+*/
  /* for _, image := range request.Images {
     path := strings.Split(image.Path, ",")
     log.Println("path[1]   ", path[1])
@@ -318,11 +318,10 @@ if err := ph.productUsecase.CreateImage(&image); err != nil {
   }
 */
   for _, Value := range request.Characteristics {
-    Value.ProductID = request.Product.ID
     
       log.Println("........................Value........................")
       log.Println(Value)
-    if err := ph.productUsecase.CreateCharacteristic(Value); err != nil {
+    if err := ph.productUsecase.UpdateCharacteristic(Value , Value.ID); err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
     } else {
       log.Println(Value)

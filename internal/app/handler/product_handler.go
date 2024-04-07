@@ -133,10 +133,10 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
   c.Set("Access-Control-Allow-Headers", "Content-Type")
   c.Set("Access-Control-Allow-Credentials", "true")
 
-  id, err := strconv.Atoi(c.Params("id"))
-  if err != nil {
-    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
-  }
+  //id, err := strconv.Atoi(c.Params("id"))
+  //if err != nil {
+  //  return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
+  //}
 
   var request struct {
     Product         entity.Product           `json:"product"`
@@ -155,11 +155,11 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
   log.Println(&request)
   //return c.JSON(fiber.Map{"id": id, "request": request, "product": request.Product})
 
-  if err := ph.productUsecase.UpdateProduct(&request.Product, uint(id)); err != nil {
+  if err := ph.productUsecase.UpdateProduct(&request.Product, request.Product.ID); err != nil {
     return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
   }
 
-  oldImages, err := ph.productUsecase.GetImagesByProductID(uint(id))
+  oldImages, err := ph.productUsecase.GetImagesByProductID(request.Product.ID)
   if err != nil {
     return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 2": err.Error()})
   }

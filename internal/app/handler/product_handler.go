@@ -140,7 +140,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
   var request struct {
     Product         entity.Product           `json:"product"`
     Images          []entity.Image          `json:"images"`
-    Characteristics []*entity.Characteristic `json:"characteristics"`
+    Characteristics []entity.Characteristic `json:"characteristics"`
   }
 
   if err := c.BodyParser(&request); err != nil {

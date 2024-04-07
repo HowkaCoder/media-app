@@ -263,12 +263,12 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
     }
 
-  } else if minPrice > 0  maxPrice > 0 {
+  } else if minPrice > 0 && maxPrice > 0 {
     products, err = ph.productUsecase.GetProductsByPriceRange(uint(minPrice), uint(maxPrice))
     if err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
     }
-  } else if value != ""  description != "" {
+  } else if value != "" && description != "" {
     products, err = ph.productUsecase.GetProductsByCharacteristics(value, description)
     if err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

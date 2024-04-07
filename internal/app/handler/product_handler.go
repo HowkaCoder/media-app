@@ -155,6 +155,15 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
   log.Println(&request)
   //return c.JSON(fiber.Map{"id": id, "request": request, "product": request.Product})
 
+  
+
+log.Println("...............Request Product ID...............")
+  
+  log.Println(request.Product.ID)
+  
+  log.Println("...............Update Product...............")
+  
+  log.Println(request.Product)
   if err := ph.productUsecase.UpdateProduct(&request.Product, request.Product.ID); err != nil {
     return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
   }
@@ -167,6 +176,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
     path := strings.Split(oldImage.Path, "/")
     oldPath := filepath.Join(path[3], path[4])
     log.Println(oldPath)
+    
     if err := os.Remove(oldPath); err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
     }

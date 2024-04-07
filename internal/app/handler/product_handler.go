@@ -12,7 +12,6 @@ import (
   "media-app/internal/app/entity"
   "media-app/internal/app/usecase"
   "os"
-  "path/filepath"
   "strconv"
   "strings"
 )
@@ -233,7 +232,7 @@ log.Println("...............Request Product ID...............")
       Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
     }
 
-if err := ph.productUsecase.CreateImage(image); err != nil {
+if err := ph.productUsecase.CreateImage(&image); err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
     }
 

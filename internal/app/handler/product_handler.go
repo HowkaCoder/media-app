@@ -140,7 +140,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
   var request struct {
     Product         entity.Product           `json:"product"`
-    Images          []*entity.Image          `json:"images"`
+    Images          []entity.Image          `json:"images"`
     Characteristics []*entity.Characteristic `json:"characteristics"`
   }
 
@@ -175,7 +175,7 @@ log.Println("...............Request Product ID...............")
 
 
 
- oldPaths := make(map[string]*entity.Image)
+ oldPaths := make(map[string]entity.Image)
     for _ , img := range oldImages {
         oldPaths[img.Path] = img
     }
@@ -233,7 +233,7 @@ log.Println("...............Request Product ID...............")
       Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
     }
 
-if err := ph.productUsecase.CreateImage(&image); err != nil {
+if err := ph.productUsecase.CreateImage(image); err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
     }
 
@@ -251,7 +251,7 @@ if err := ph.productUsecase.CreateImage(&image); err != nil {
 
 
   
-  for _, oldImage := range oldImages {
+/*  for _, oldImage := range oldImages {
     path := strings.Split(oldImage.Path, "/")
     oldPath := filepath.Join(path[3], path[4])
     log.Println(oldPath)
@@ -264,7 +264,7 @@ if err := ph.productUsecase.CreateImage(&image); err != nil {
       return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 3 ": err.Error()})
     }
   }
-
+*/
   oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
   if err != nil {
     return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 4 ": err.Error()})
@@ -275,7 +275,7 @@ if err := ph.productUsecase.CreateImage(&image); err != nil {
     }
   }
 
-  for _, image := range request.Images {
+ /* for _, image := range request.Images {
     path := strings.Split(image.Path, ",")
     log.Println("path[1]   ", path[1])
     decodedImage, err := base64.StdEncoding.DecodeString(path[1])
@@ -317,7 +317,7 @@ if err := ph.productUsecase.CreateImage(&image); err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
     }
   }
-
+*/
   for _, Value := range request.Characteristics {
     if err := ph.productUsecase.CreateCharacteristic(Value); err != nil {
       return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})

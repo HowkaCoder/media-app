@@ -33,9 +33,9 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
   c.Set("Access-Control-Allow-Credentials", "true")
 
   var request struct {
-    Product         entity.Product           json:"product"
-    Images          []entity.Image           json:"images"
-    Characteristics []*entity.Characteristic json:"characteristics"
+    Product         entity.Product           `json:"product"`
+    Images          []entity.Image           `json:"images"`
+    Characteristics []*entity.Characteristic `json:"characteristics"`
   }
 
   log.Println("...............Create Product...............")
@@ -139,9 +139,9 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
   }
 
   var request struct {
-    Product         entity.Product           json:"product"
-    Images          []*entity.Image          json:"images"
-    Characteristics []*entity.Characteristic json:"characteristics"
+    Product         entity.Product           `json:"product"`
+    Images          []*entity.Image          `json:"images"`
+    Characteristics []*entity.Characteristic `json:"characteristics"`
   }
 
   if err := c.BodyParser(&request); err != nil {

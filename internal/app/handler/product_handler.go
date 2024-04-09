@@ -352,7 +352,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	}
 	
 	log.Println(".......................Images Updating.......................")
-	if len(request.Images) > 0 {
+	/*if len(request.Images) > 0 {
 
 		for _, image := range request.Images {
 			path := strings.Split(image.Path, ",")
@@ -406,6 +406,82 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		}
 
 	}
+*/
+
+
+	
+ oldImages, err := ph.productUsecase.GetImagesByProductID(request.Product.ID)
+ if err != nil {
+   return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 2": err.Error()})
+ }
+
+
+
+oldPaths := make(map[string]entity.Image)
+   for _ , img := range oldImages {
+       oldPaths[img.Path] = img
+   }
+
+
+
+
+   for _, newImg := range request.Images {
+       if oldImg, exists := oldPaths[newImg.Path]; !exists || oldImg.Path != newImg.Path {
+           // Удаляем старое изображение, если путь изменился
+           if exists {
+               if err := os.Remove(oldImg.Path); err != nil {
+                   return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to remove old image"})
+               }
+               if err := ph.productUsecase.DeleteImage(oldImg.ID); err != nil {
+                   return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "failed to delete old image record"})
+               }
+           }
+
+
+     path := strings.Split(newImg.Path, ",")
+   log.Println("path[1]   ", path[1])
+   decodedImage, err := base64.StdEncoding.DecodeString(path[1])
+   if err != nil {
+     return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 6": err.Error()})
+   }
+   var imageFormat string
+   switch {
+   case bytes.HasPrefix(decodedImage, []byte{0xFF, 0xD8}):
+     imageFormat = ".jpg"
+   case bytes.HasPrefix(decodedImage, []byte{0x89, 0x50, 0x4E, 0x47}):
+     imageFormat = ".png"
+   case bytes.HasPrefix(decodedImage, []byte{0x47, 0x49, 0x46, 0x38}):
+     imageFormat = ".gif"
+   case bytes.HasPrefix(decodedImage, []byte{0x42, 0x4D}):
+     imageFormat = ".bmp"
+   case bytes.HasPrefix(decodedImage, []byte{0x52, 0x49, 0x46, 0x46}): // TIFF
+     imageFormat = ".tiff"
+   default:
+     return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Unsupported image format"})
+   }
+   fileName := uuid.New().String() + imageFormat
+   file, err := os.Create("images/" + fileName)
+   if err != nil {
+     return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+   }
+   defer file.Close()
+
+   if _, err := file.Write(decodedImage); err != nil {
+     return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+   }
+
+   image := entity.Image{
+     ProductID: request.Product.ID,
+     Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
+   }
+
+if err := ph.productUsecase.CreateImage(&image); err != nil {
+     return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
+   }
+
+
+       }
+   }
 
 	log.Println(".......................Characteristics Updating.......................")
 	if len(request.Characteristics) > 0 {

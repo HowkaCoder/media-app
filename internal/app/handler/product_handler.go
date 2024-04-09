@@ -356,7 +356,6 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 		for _, image := range request.Images {
 			path := strings.Split(image.Path, ",")
-			log.Println("path[1]   ", path[1])
 			decodedImage, err := base64.StdEncoding.DecodeString(path[1])
 			if err != nil {
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #3": err.Error()})

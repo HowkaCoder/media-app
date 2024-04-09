@@ -334,25 +334,23 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 	log.Println(".......................Update Product.......................")
 	var request struct {
-		Product         *entity.Product         `json:"product"`
+		Product         entity.Product          `json:"product"`
 		Images          []entity.Image          `json:"images"`
 		Characteristics []entity.Characteristic `json:"characteristics"`
 	}
-	if request.Product != nil {
-		if err := c.BodyParser(&request); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error #1": err.Error()})
-		}
-	}
 
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error #1": err.Error()})
+	}
 	log.Println(".......................Request.......................")
 	log.Println(request)
 
 	log.Println(".......................Product Updating.......................")
 
-	if err := ph.productUsecase.UpdateProduct(request.Product, request.Product.ID); err != nil {
+	if err := ph.productUsecase.UpdateProduct(&request.Product, request.Product.ID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #2": err.Error()})
 	}
-
+	
 	log.Println(".......................Images Updating.......................")
 	if len(request.Images) > 0 {
 

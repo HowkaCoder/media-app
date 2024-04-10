@@ -10,6 +10,7 @@ import (
 	"media-app/internal/app/entity"
 	"media-app/internal/app/usecase"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -124,215 +125,14 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 
 }
 
-//func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
-//  c.Set("Access-Control-Allow-Origin", "*")
-//  c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH")
-//  c.Set("Access-Control-Allow-Headers", "Content-Type")
-//  c.Set("Access-Control-Allow-Credentials", "true")
 //
-//  //id, err := strconv.Atoi(c.Params("id"))
-//  //if err != nil {
-//  //  return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
-//  //}
-//
-//  var request struct {
-//    Product         entity.Product           `json:"product"`
-//    Images          []entity.Image          `json:"images"`
-//    Characteristics []entity.Characteristic `json:"characteristics"`
-//  }
-//
-//  if err := c.BodyParser(&request); err != nil {
-//    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 1": err.Error()})
-//  }
-//
-//  log.Println("...............Update Product...............")
-//
-//  log.Println("\n\n\n ")
-//  log.Println("...............Request...............")
-//  log.Println(&request)
-//  //return c.JSON(fiber.Map{"id": id, "request": request, "product": request.Product})
-//
-//
-//
-//log.Println("...............Request Product ID...............")
-//
-//  log.Println(request.Product.ID)
-//
-//  log.Println("...............Update Product...............")
-//
-//  log.Println(request.Product)
-//  if err := ph.productUsecase.UpdateProduct(&request.Product, request.Product.ID); err != nil {
-//    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-//  }
-//
-//  oldImages, err := ph.productUsecase.GetImagesByProductID(request.Product.ID)
-//  if err != nil {
-//    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 2": err.Error()})
-//  }
-//
-//
-//
-// oldPaths := make(map[string]entity.Image)
-//    for _ , img := range oldImages {
-//        oldPaths[img.Path] = img
-//    }
-//
-//
-//
-//
-//    for _, newImg := range request.Images {
-//        if oldImg, exists := oldPaths[newImg.Path]; !exists || oldImg.Path != newImg.Path {
-//            // Удаляем старое изображение, если путь изменился
-//            if exists {
-//                if err := os.Remove(oldImg.Path); err != nil {
-//                    return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to remove old image"})
-//                }
-//                if err := ph.productUsecase.DeleteImage(oldImg.ID); err != nil {
-//                    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "failed to delete old image record"})
-//                }
-//            }
-//
-//
-//      path := strings.Split(newImg.Path, ",")
-//    log.Println("path[1]   ", path[1])
-//    decodedImage, err := base64.StdEncoding.DecodeString(path[1])
-//    if err != nil {
-//      return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 6": err.Error()})
-//    }
-//    var imageFormat string
-//    switch {
-//    case bytes.HasPrefix(decodedImage, []byte{0xFF, 0xD8}):
-//      imageFormat = ".jpg"
-//    case bytes.HasPrefix(decodedImage, []byte{0x89, 0x50, 0x4E, 0x47}):
-//      imageFormat = ".png"
-//    case bytes.HasPrefix(decodedImage, []byte{0x47, 0x49, 0x46, 0x38}):
-//      imageFormat = ".gif"
-//    case bytes.HasPrefix(decodedImage, []byte{0x42, 0x4D}):
-//      imageFormat = ".bmp"
-//    case bytes.HasPrefix(decodedImage, []byte{0x52, 0x49, 0x46, 0x46}): // TIFF
-//      imageFormat = ".tiff"
-//    default:
-//      return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Unsupported image format"})
-//    }
-//    fileName := uuid.New().String() + imageFormat
-//    file, err := os.Create("images/" + fileName)
-//    if err != nil {
-//      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-//    }
-//    defer file.Close()
-//
-//    if _, err := file.Write(decodedImage); err != nil {
-//      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-//    }
-//
-//    image := entity.Image{
-//      ProductID: request.Product.ID,
-//      Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
-//    }
-//
-//if err := ph.productUsecase.CreateImage(&image); err != nil {
-//      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
-//    }
-//
-//
-//        }
-//    }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-///*  for _, oldImage := range oldImages {
-//    path := strings.Split(oldImage.Path, "/")
-//    oldPath := filepath.Join(path[3], path[4])
-//    log.Println(oldPath)
-//
-//    if err := os.Remove(oldPath); err != nil {
-//      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-//    }
-//
-//    if err := ph.productUsecase.DeleteImage(oldImage.ID); err != nil {
-//      return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 3 ": err.Error()})
-//    }
-//  }
-//*/
-// /* oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
-//  if err != nil {
-//    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 4 ": err.Error()})
-//  }
-//  for _, oldValue := range oldValues {
-//    if err := ph.productUsecase.DeleteCharacteristic(oldValue.ID); err != nil {
-//      return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 5 ": err.Error()})
-//    }
-//  }
-//*/
-// /* for _, image := range request.Images {
-//    path := strings.Split(image.Path, ",")
-//    log.Println("path[1]   ", path[1])
-//    decodedImage, err := base64.StdEncoding.DecodeString(path[1])
-//    if err != nil {
-//      return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 6": err.Error()})
-//    }
-//    var imageFormat string
-//    switch {
-//    case bytes.HasPrefix(decodedImage, []byte{0xFF, 0xD8}):
-//      imageFormat = ".jpg"
-//    case bytes.HasPrefix(decodedImage, []byte{0x89, 0x50, 0x4E, 0x47}):
-//      imageFormat = ".png"
-//    case bytes.HasPrefix(decodedImage, []byte{0x47, 0x49, 0x46, 0x38}):
-//      imageFormat = ".gif"
-//    case bytes.HasPrefix(decodedImage, []byte{0x42, 0x4D}):
-//      imageFormat = ".bmp"
-//    case bytes.HasPrefix(decodedImage, []byte{0x52, 0x49, 0x46, 0x46}): // TIFF
-//      imageFormat = ".tiff"
-//    default:
-//      return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Unsupported image format"})
-//    }
-//    fileName := uuid.New().String() + imageFormat
-//    file, err := os.Create("images/" + fileName)
-//    if err != nil {
-//      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-//    }
-//    defer file.Close()
-//
-//    if _, err := file.Write(decodedImage); err != nil {
-//      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-//    }
-//
-//    image := entity.Image{
-//      ProductID: request.Product.ID,
-//      Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
-//    }
-//
-//if err := ph.productUsecase.CreateImage(&image); err != nil {
-//      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
-//    }
-//  }
-//*/
-//  for _, Value := range request.Characteristics {
-//
-//      log.Println("........................Value........................")
-//      log.Println(Value)
-//    if err := ph.productUsecase.UpdateCharacteristic(Value , Value.ID); err != nil {
-//      return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-//    } else {
-//      log.Println(Value)
-//    }
-//  }
-//
-//  return c.JSON(fiber.Map{"message": "successfully updated"})
-//
-//}
-
 //func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 //
-//	log.Println(".......................Update Product.......................")
+//	id, err := strconv.Atoi(c.Params("id"))
+//	if err != nil {
+//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
+//	}
+//
 //	var request struct {
 //		Product         entity.Product          `json:"product"`
 //		Images          []entity.Image          `json:"images"`
@@ -340,26 +140,59 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 //	}
 //
 //	if err := c.BodyParser(&request); err != nil {
-//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error #1": err.Error()})
+//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 //	}
-//	log.Println(".......................Request.......................")
-//	log.Println(request)
+//	//return c.JSON(fiber.Map{"id": id, "request": request, "product": request.Product})
 //
-//	log.Println(".......................Product Updating.......................")
-//
-//	if err := ph.productUsecase.UpdateProduct(&request.Product, request.Product.ID); err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #2": err.Error()})
+//	if err := ph.productUsecase.UpdateProduct(&request.Product, uint(id)); err != nil {
+//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 //	}
 //
-//	log.Println(".......................Images Updating.......................")
-//	if len(request.Images) > 0 {
+//	log.Println("...............Old Images Removing...............")
+//	//oldImages, err := ph.productUsecase.GetImagesByProductID(uint(id))
+//	//if err != nil {
+//	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+//	//}
+//	//for _, oldImage := range oldImages {
+//	//	path := strings.Split(oldImage.Path, "/")
+//	//	oldPath := filepath.Join(path[3], path[4])
+//	//	log.Println(oldPath)
+//	//	if err := os.Remove(oldPath); err != nil {
+//	//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+//	//	}
+//	//
+//	//	if err := ph.productUsecase.DeleteImage(oldImage.ID); err != nil {
+//	//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+//	//	}
+//	//}
 //
-//		for _, image := range request.Images {
-//			path := strings.Split(image.Path, ",")
+//	oldImages, err := ph.productUsecase.GetImagesByProductID(request.Product.ID)
+//	if err != nil {
+//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 2": err.Error()})
+//	}
+//
+//	oldPaths := make(map[string]entity.Image)
+//	for _, img := range oldImages {
+//		oldPaths[img.Path] = img
+//	}
+//
+//	for _, newImg := range request.Images {
+//		if oldImg, exists := oldPaths[newImg.Path]; !exists || oldImg.Path != newImg.Path {
+//			// Удаляем старое изображение, если путь изменился
+//			if exists {
+//				if err := os.Remove(oldImg.Path); err != nil {
+//					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to remove old image"})
+//				}
+//				if err := ph.productUsecase.DeleteImage(oldImg.ID); err != nil {
+//					return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "failed to delete old image record"})
+//				}
+//			}
+//
+//			path := strings.Split(newImg.Path, ",")
 //			log.Println("path[1]   ", path[1])
 //			decodedImage, err := base64.StdEncoding.DecodeString(path[1])
 //			if err != nil {
-//				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #3": err.Error()})
+//				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 6": err.Error()})
 //			}
 //			var imageFormat string
 //			switch {
@@ -374,186 +207,191 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 //			case bytes.HasPrefix(decodedImage, []byte{0x52, 0x49, 0x46, 0x46}): // TIFF
 //				imageFormat = ".tiff"
 //			default:
-//				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #4": "Unsupported image format"})
+//				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Unsupported image format"})
 //			}
 //			fileName := uuid.New().String() + imageFormat
 //			file, err := os.Create("images/" + fileName)
 //			if err != nil {
-//				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error #5": err.Error()})
+//				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 //			}
 //			defer file.Close()
 //
 //			if _, err := file.Write(decodedImage); err != nil {
-//				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error #6": err.Error()})
+//				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 //			}
 //
-//			if image.ID != 0 {
-//				image.ProductID = request.Product.ID
-//				image.Path = fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName)
-//
-//				if err := ph.productUsecase.UpdateImage(image, image.ID); err != nil {
-//					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #7": err.Error()})
-//				}
+//			image := entity.Image{
+//				ProductID: request.Product.ID,
+//				Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
 //			}
-//			if image.ID == 0 {
-//				eImage := entity.Image{
-//					ProductID: request.Product.ID,
-//					Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
-//				}
-//				if err := ph.productUsecase.CreateImage(&eImage); err != nil {
-//					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #8": err.Error()})
-//				}
+//
+//			if err := ph.productUsecase.CreateImage(&image); err != nil {
+//				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
 //			}
-//		}
 //
-//	}
-//
-//	log.Println(".......................Characteristics Updating.......................")
-//	if len(request.Characteristics) > 0 {
-//		for _, Value := range request.Characteristics {
-//
-//			log.Println("........................Value........................")
-//			log.Println(Value)
-//
-//			if Value.ID != 0 {
-//				if err := ph.productUsecase.UpdateCharacteristic(Value, Value.ID); err != nil {
-//					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #9": err.Error()})
-//				}
-//			}
-//			if Value.ID == 0 {
-//				eChar := entity.Characteristic{ProductID: request.Product.ID, Value: Value.Value, Description: Value.Description}
-//
-//				if err := ph.productUsecase.CreateCharacteristic(&eChar); err != nil {
-//					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #10": err.Error()})
-//				}
-//			}
 //		}
 //	}
 //
-//	return c.JSON(fiber.Map{"message": "successfully updated "})
+//	log.Println("...............Old Characteristics Removing...............")
+//	oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
+//	if err != nil {
+//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+//	}
+//	for _, oldValue := range oldValues {
+//		if err := ph.productUsecase.DeleteCharacteristic(oldValue.ProductID); err != nil {
+//			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+//		}
+//	}
+//
+//	log.Println("...............Update Request Images...............")
+//	log.Println("INFO: ", request.Images)
+//	for _, image := range request.Images {
+//
+//		path := strings.Split(image.Path, ",")
+//		log.Println("...............Base64URL of Image...............")
+//		log.Println(path[1])
+//		decodedImage, err := base64.StdEncoding.DecodeString(path[1])
+//
+//		log.Println("...............Decoded Image...............")
+//		log.Println("INFO: ", decodedImage)
+//		if err != nil {
+//			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+//		}
+//		var imageFormat string
+//		switch {
+//		case bytes.HasPrefix(decodedImage, []byte{0xFF, 0xD8}):
+//			imageFormat = ".jpg"
+//		case bytes.HasPrefix(decodedImage, []byte{0x89, 0x50, 0x4E, 0x47}):
+//			imageFormat = ".png"
+//		case bytes.HasPrefix(decodedImage, []byte{0x47, 0x49, 0x46, 0x38}):
+//			imageFormat = ".gif"
+//		case bytes.HasPrefix(decodedImage, []byte{0x42, 0x4D}):
+//			imageFormat = ".bmp"
+//		case bytes.HasPrefix(decodedImage, []byte{0x52, 0x49, 0x46, 0x46}): // TIFF
+//			imageFormat = ".tiff"
+//		default:
+//			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Unsupported image format"})
+//		}
+//		fileName := uuid.New().String() + imageFormat
+//		log.Println("...............Image FileName...............")
+//
+//		file, err := os.Create("images/" + fileName)
+//		if err != nil {
+//			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+//		}
+//		defer file.Close()
+//
+//		log.Println("...............Empty File...............")
+//		log.Println("INFO: ", file)
+//		if _, err := file.Write(decodedImage); err != nil {
+//			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+//		}
+//
+//		image := entity.Image{
+//			ProductID: request.Product.ID,
+//			Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
+//		}
+//
+//		log.Println("...............Entity Image...............")
+//		log.Println("INFO: ", image)
+//		if err := ph.productUsecase.CreateImage(&image); err != nil {
+//			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
+//		}
+//	}
+//
+//	log.Println("...............Update Request Characteristics...............")
+//	log.Println("INFO: ", request.Characteristics)
+//	for _, chars := range request.Characteristics {
+//		chars.ProductID = request.Product.ID
+//
+//		if err := ph.productUsecase.CreateCharacteristic(&chars); err != nil {
+//			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 2": err.Error()})
+//		}
+//
+//		log.Println("INFO: ", chars)
+//
+//	}
+//
+//	return c.JSON(fiber.Map{"message": "successfully updated"})
 //
 //}
 
 func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
-
-	id, err := strconv.Atoi(c.Params("id"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
-	}
-
 	var request struct {
 		Product         entity.Product          `json:"product"`
 		Images          []entity.Image          `json:"images"`
 		Characteristics []entity.Characteristic `json:"characteristics"`
 	}
 
-	if err := c.BodyParser(&request); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-	//return c.JSON(fiber.Map{"id": id, "request": request, "product": request.Product})
+	log.Println("....................................UPDATE PRODUCT STARTS....................................")
 
-	if err := ph.productUsecase.UpdateProduct(&request.Product, uint(id)); err != nil {
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"Error #1": err.Error(),
+		})
+	}
+
+	log.Println("....................................PRODUCT UPDATING ....................................")
+
+	if err := ph.productUsecase.UpdateProduct(&request.Product, request.Product.ID); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
-
-	log.Println("...............Old Images Removing...............")
-	//oldImages, err := ph.productUsecase.GetImagesByProductID(uint(id))
-	//if err != nil {
-	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	//}
-	//for _, oldImage := range oldImages {
-	//	path := strings.Split(oldImage.Path, "/")
-	//	oldPath := filepath.Join(path[3], path[4])
-	//	log.Println(oldPath)
-	//	if err := os.Remove(oldPath); err != nil {
-	//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-	//	}
-	//
-	//	if err := ph.productUsecase.DeleteImage(oldImage.ID); err != nil {
-	//		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	//	}
-	//}
 
 	oldImages, err := ph.productUsecase.GetImagesByProductID(request.Product.ID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 2": err.Error()})
 	}
 
-	oldPaths := make(map[string]entity.Image)
-	for _, img := range oldImages {
-		oldPaths[img.Path] = img
+	toDelete := []uint{}
+	toAdd := []entity.Image{}
+
+	for _, oldImage := range oldImages {
+		found := false
+		for _, eImage := range request.Images {
+			if eImage.ID == oldImage.ID {
+				found = true
+				if err := ph.productUsecase.UpdateImage(eImage, eImage.ID); err != nil {
+					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+				}
+				break
+			}
+		}
+		if !found {
+			toDelete = append(toDelete, oldImage.ID)
+		}
 	}
 
-	for _, newImg := range request.Images {
-		if oldImg, exists := oldPaths[newImg.Path]; !exists || oldImg.Path != newImg.Path {
-			// Удаляем старое изображение, если путь изменился
-			if exists {
-				if err := os.Remove(oldImg.Path); err != nil {
-					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to remove old image"})
-				}
-				if err := ph.productUsecase.DeleteImage(oldImg.ID); err != nil {
-					return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "failed to delete old image record"})
-				}
-			}
+	for _, requestImage := range request.Images {
+		if requestImage.ID == 0 {
+			toAdd = append(toAdd, requestImage)
+		}
+	}
 
-			path := strings.Split(newImg.Path, ",")
-			log.Println("path[1]   ", path[1])
-			decodedImage, err := base64.StdEncoding.DecodeString(path[1])
+	if len(toDelete) > 0 {
+
+		log.Println("...............Old Images Removing...............")
+		for _, i := range toDelete {
+
+			dImage, err := ph.productUsecase.GetImageByID(i)
 			if err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 6": err.Error()})
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 			}
-			var imageFormat string
-			switch {
-			case bytes.HasPrefix(decodedImage, []byte{0xFF, 0xD8}):
-				imageFormat = ".jpg"
-			case bytes.HasPrefix(decodedImage, []byte{0x89, 0x50, 0x4E, 0x47}):
-				imageFormat = ".png"
-			case bytes.HasPrefix(decodedImage, []byte{0x47, 0x49, 0x46, 0x38}):
-				imageFormat = ".gif"
-			case bytes.HasPrefix(decodedImage, []byte{0x42, 0x4D}):
-				imageFormat = ".bmp"
-			case bytes.HasPrefix(decodedImage, []byte{0x52, 0x49, 0x46, 0x46}): // TIFF
-				imageFormat = ".tiff"
-			default:
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Unsupported image format"})
-			}
-			fileName := uuid.New().String() + imageFormat
-			file, err := os.Create("images/" + fileName)
-			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-			}
-			defer file.Close()
-
-			if _, err := file.Write(decodedImage); err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+			path := strings.Split(dImage.Path, "/")
+			oldPath := filepath.Join(path[3], path[4])
+			log.Println(oldPath)
+			if err := os.Remove(oldPath); err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 			}
 
-			image := entity.Image{
-				ProductID: request.Product.ID,
-				Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
-			}
-
-			if err := ph.productUsecase.CreateImage(&image); err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
+			if err := ph.productUsecase.DeleteImage(dImage.ID); err != nil {
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 			}
 
 		}
 	}
 
-	log.Println("...............Old Characteristics Removing...............")
-	oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-	for _, oldValue := range oldValues {
-		if err := ph.productUsecase.DeleteCharacteristic(oldValue.ProductID); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-		}
-	}
-
-	log.Println("...............Update Request Images...............")
-	log.Println("INFO: ", request.Images)
-	for _, image := range request.Images {
+	for _, image := range toAdd {
+		log.Println("...............New Images Adding...............")
 
 		path := strings.Split(image.Path, ",")
 		log.Println("...............Base64URL of Image...............")
@@ -605,6 +443,18 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		if err := ph.productUsecase.CreateImage(&image); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1": err.Error()})
 		}
+
+	}
+
+	log.Println("...............Old Characteristics Removing...............")
+	oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(request.Product.ID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	for _, oldValue := range oldValues {
+		if err := ph.productUsecase.DeleteCharacteristic(oldValue.ID); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
 	}
 
 	log.Println("...............Update Request Characteristics...............")
@@ -620,8 +470,9 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 	}
 
-	return c.JSON(fiber.Map{"message": "successfully updated"})
-
+	return c.JSON(fiber.Map{
+		"message": "successfully updated",
+	})
 }
 
 func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {

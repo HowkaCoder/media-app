@@ -535,34 +535,46 @@ func (ph *ProductHandler) GetProductByID(c *fiber.Ctx) error {
 }
 
 func (ph *ProductHandler) DeleteProduct(c *fiber.Ctx) error {
+
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #1": err.Error()})
 	}
 
 	oldImages, err := ph.productUsecase.GetImagesByProductID(uint(id))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
-	for _, oldImage := range oldImages {
-		if err := ph.productUsecase.DeleteImage(oldImage.ID); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #2": err.Error()})
 	}
 
+	log.Println("...............Old Images Removing...............")
+	for _, i := range oldImages {
+
+		path := strings.Split(i.Path, "/")
+		oldPath := filepath.Join(path[3], path[4])
+		log.Println(oldPath)
+		if err := os.Remove(oldPath); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #3": err.Error()})
+		}
+
+		if err := ph.productUsecase.DeleteImage(i.ID); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #4": err.Error()})
+		}
+
+	}
+
+	log.Println("...............Old Characteristics Removing...............")
 	oldValues, err := ph.productUsecase.GetCharacteristicsByProductID(uint(id))
 	if err != nil {
-
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #5": err.Error()})
 	}
 	for _, oldValue := range oldValues {
-		if err := ph.productUsecase.DeleteCharacteristic(oldValue.ProductID); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		if err := ph.productUsecase.DeleteCharacteristic(oldValue.ID); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #6": err.Error()})
 		}
 	}
 
 	if err := ph.productUsecase.DeleteProduct(uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #7": err.Error()})
 	}
 
 	return c.JSON(fiber.Map{"message": "successfully deleted"})

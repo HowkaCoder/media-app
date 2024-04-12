@@ -83,7 +83,7 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 		}
 		fileName := uuid.New().String() + imageFormat
 		log.Println("...............Image FileName...............")
-
+						
 		file, err := os.Create("images/" + fileName)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

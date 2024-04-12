@@ -334,12 +334,12 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	log.Println("....................................PRODUCT UPDATING ....................................")
 
 	if err := ph.productUsecase.UpdateProduct(&request.Product, request.Product.ID); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #2": err.Error()})
 	}
 
 	oldImages, err := ph.productUsecase.GetImagesByProductID(request.Product.ID)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error 2": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #3": err.Error()})
 	}
 
 	toDelete := []uint{}
@@ -351,7 +351,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 			if eImage.ID == oldImage.ID {
 				found = true
 				if err := ph.productUsecase.UpdateImage(eImage, eImage.ID); err != nil {
-					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #4": err.Error()})
 				}
 				break
 			}
@@ -362,9 +362,11 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	}
 
 	for _, requestImage := range request.Images {
+		log.Println("INFO: ", requestImage)
 		if requestImage.ID == 0 {
 			toAdd = append(toAdd, requestImage)
 		}
+		log.Println("INFO: ", toAdd)
 	}
 
 	if len(toDelete) > 0 {
@@ -374,17 +376,17 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 			dImage, err := ph.productUsecase.GetImageByID(i)
 			if err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #5": err.Error()})
 			}
 			path := strings.Split(dImage.Path, "/")
 			oldPath := filepath.Join(path[3], path[4])
 			log.Println(oldPath)
 			if err := os.Remove(oldPath); err != nil {
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #6": err.Error()})
 			}
 
 			if err := ph.productUsecase.DeleteImage(dImage.ID); err != nil {
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #7": err.Error()})
 			}
 
 		}
@@ -401,7 +403,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 		log.Println("...............Decoded Image...............")
 		log.Println("INFO: ", decodedImage)
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error #8": err.Error()})
 		}
 		var imageFormat string
 		switch {
@@ -461,6 +463,7 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	log.Println("INFO: ", request.Characteristics)
 	for _, chars := range request.Characteristics {
 		chars.ProductID = request.Product.ID
+		chars.ID = 0
 
 		if err := ph.productUsecase.CreateCharacteristic(&chars); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 2": err.Error()})

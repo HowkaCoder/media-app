@@ -7,16 +7,17 @@ import (
 
 type Product struct {
 	gorm.Model
-	ID         uint           ` gorm:"primaryKey ; column:id" json:"id"`
-	CreatedAt  time.Time      `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt  time.Time      `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt  gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
-	CategoryID *uint          `gorm:"not null" json:"category_id"`
-	Name       string         `gorm:"not null" json:"name"`
-	Price      uint           `gorm:"not null" json:"price"`
-	Discount   uint           `gorm:"null" json:"discount"`
-	Quantity   uint           `gorm:"not null" json:"quantity"`
-	Category   Category       `gorm:"foreignKey:CategoryID" json:"category"`
+	ID          uint           ` gorm:"primaryKey ; column:id" json:"id"`
+	CreatedAt   time.Time      `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt   time.Time      `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
+	CategoryID  *uint          `gorm:"not null" json:"category_id"`
+	Name        string         `gorm:"not null" json:"name"`
+	Description string         `gorm:"not null" json:"description"`
+	Price       uint           `gorm:"not null" json:"price"`
+	Discount    uint           `gorm:"null" json:"discount"`
+	Quantity    uint           `gorm:"not null" json:"quantity"`
+	Category    Category       `gorm:"foreignKey:CategoryID" json:"category"`
 
 	Images          []Image               `json:"images" gorm:"foreignKey:ProductID"`
 	Characteristics []Characteristic      `json:"characteristics" gorm:"foreignKey:ProductID"`

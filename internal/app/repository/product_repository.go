@@ -156,6 +156,9 @@ func (pr *productRepository) UpdateProduct(product *entity.Product, id uint) err
 	if product.Name != "" {
 		eProduct.Name = product.Name
 	}
+	if product.Description != "" {
+		eProduct.Description = product.Description
+	}
 	if product.Price != 0 {
 		eProduct.Price = product.Price
 	}

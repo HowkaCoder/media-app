@@ -9,13 +9,13 @@ import (
 type ProductUseCase interface {
 
 	// PRODUCT - CRUD FUNCTIONS
-	GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint) ([]entity.Product, error)
-	GetProductsByCharacteristics(value, description string) ([]entity.Product, error)
-	GetProductsByPriceRange(minPrice, maxPrice uint) ([]entity.Product, error)
-	GetProductsByCategoryID(id uint) ([]entity.Product, error)
-	GetAllProducts() ([]entity.Product, error)
-	GetProductsWithPagination(limit int) ([]entity.Product, error)
-	GetProductByID(id uint) (*entity.Product, error)
+	GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint, language string) ([]entity.Product, error)
+	GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error)
+	GetProductsByCharacteristics(value, description, language string) ([]entity.Product, error)
+	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
+	GetAllProducts(language string) ([]entity.Product, error)
+	GetProductsWithPagination(limit int, language string) ([]entity.Product, error)
+	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
@@ -92,14 +92,14 @@ func (pu *productUseCase) CreateProduct(product *entity.Product) error {
 	return pu.productRepo.CreateProduct(product)
 }
 
-func (pu *productUseCase) GetProductsByCharacteristics(value, description string) ([]entity.Product, error) {
-	return pu.productRepo.GetProductsByCharacteristics(value, description)
+func (pu *productUseCase) GetProductsByCharacteristics(value, description, language string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsByCharacteristics(value, description, language)
 
 }
 
-func (pu *productUseCase) GetAllProducts() ([]entity.Product, error) {
+func (pu *productUseCase) GetAllProducts(language string) ([]entity.Product, error) {
 
-	return pu.productRepo.GetAllProducts()
+	return pu.productRepo.GetAllProducts(language)
 }
 
 func (pu *productUseCase) UpdateProduct(product *entity.Product, id uint) error {
@@ -112,26 +112,26 @@ func (pu *productUseCase) UpdateProduct(product *entity.Product, id uint) error 
 	return pu.productRepo.UpdateProduct(product, id)
 }
 
-func (pu *productUseCase) GetProductByID(id uint) (*entity.Product, error) {
-	return pu.productRepo.GetProductByID(id)
+func (pu *productUseCase) GetProductByID(id uint, language string) (*entity.Product, error) {
+	return pu.productRepo.GetProductByID(id, language)
 }
 
-func (pu *productUseCase) GetProductsWithPagination(limit int) ([]entity.Product, error) {
-	return pu.productRepo.GetProductsWithPagination(limit)
+func (pu *productUseCase) GetProductsWithPagination(limit int, language string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsWithPagination(limit, language)
 }
 
 func (pu *productUseCase) DeleteProduct(id uint) error {
 	return pu.productRepo.DeleteProduct(id)
 }
 
-func (pu *productUseCase) GetProductsByCategoryID(id uint) ([]entity.Product, error) {
-	return pu.productRepo.GetProductsByCategoryID(id)
+func (pu *productUseCase) GetProductsByCategoryID(id uint, language string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsByCategoryID(id, language)
 }
 
-func (pu *productUseCase) GetProductsByPriceRange(minPrice, maxPrice uint) ([]entity.Product, error) {
-	return pu.productRepo.GetProductsByPriceRange(minPrice, maxPrice)
+func (pu *productUseCase) GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsByPriceRange(minPrice, maxPrice, language)
 }
 
-func (pu *productUseCase) GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint) ([]entity.Product, error) {
-	return pu.productRepo.GetProductsSortedByPriceAndCategory(sortOrder, categoryID)
+func (pu *productUseCase) GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint, language string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsSortedByPriceAndCategory(sortOrder, categoryID, language)
 }

@@ -83,7 +83,7 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 		}
 		fileName := uuid.New().String() + imageFormat
 		log.Println("...............Image FileName...............")
-						
+
 		file, err := os.Create("images/" + fileName)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
@@ -480,6 +480,8 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 
+	language := c.Params("lang")
+
 	limit, _ := strconv.Atoi(c.Query("limit"))
 
 	minPrice, _ := strconv.Atoi(c.Query("min"))
@@ -495,24 +497,24 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 
 	if limit > 0 {
 		//return c.JSON(fiber.Map{"limit": limit})
-		products, err = ph.productUsecase.GetProductsWithPagination(int(limit))
+		products, err = ph.productUsecase.GetProductsWithPagination(int(limit), language)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}
 
 	} else if minPrice > 0 && maxPrice > 0 {
-		products, err = ph.productUsecase.GetProductsByPriceRange(uint(minPrice), uint(maxPrice))
+		products, err = ph.productUsecase.GetProductsByPriceRange(uint(minPrice), uint(maxPrice), language)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 	} else if value != "" && description != "" {
-		products, err = ph.productUsecase.GetProductsByCharacteristics(value, description)
+		products, err = ph.productUsecase.GetProductsByCharacteristics(value, description, language)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 	} else {
 
-		products, err = ph.productUsecase.GetAllProducts()
+		products, err = ph.productUsecase.GetAllProducts(language)
 		if err != nil {
 			return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Error": err.Error()})
 		}
@@ -522,12 +524,13 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 }
 
 func (ph *ProductHandler) GetProductByID(c *fiber.Ctx) error {
+	language := c.Params("lang")
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
 	}
 
-	product, err := ph.productUsecase.GetProductByID(uint(id))
+	product, err := ph.productUsecase.GetProductByID(uint(id), language)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
@@ -582,6 +585,7 @@ func (ph *ProductHandler) DeleteProduct(c *fiber.Ctx) error {
 }
 
 func (ph *ProductHandler) GetProductsByCategory(c *fiber.Ctx) error {
+	language := c.Params("lang")
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err.Error()})
@@ -589,14 +593,14 @@ func (ph *ProductHandler) GetProductsByCategory(c *fiber.Ctx) error {
 	sortOrder := c.Query("sort")
 
 	if sortOrder != "cheap" && sortOrder != "expensive" {
-		products, err := ph.productUsecase.GetProductsByCategoryID(uint(id))
+		products, err := ph.productUsecase.GetProductsByCategoryID(uint(id), language)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}
 		return c.JSON(products)
 	}
 
-	products, err := ph.productUsecase.GetProductsSortedByPriceAndCategory(sortOrder, uint(id))
+	products, err := ph.productUsecase.GetProductsSortedByPriceAndCategory(sortOrder, uint(id), language)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

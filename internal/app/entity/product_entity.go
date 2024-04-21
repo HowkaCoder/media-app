@@ -17,6 +17,7 @@ type Product struct {
 	Price       uint           `gorm:"not null" json:"price"`
 	Discount    uint           `gorm:"null" json:"discount"`
 	Quantity    uint           `gorm:"not null" json:"quantity"`
+	Language    string         `gorm:"not null" json:"language"`
 	Category    Category       `gorm:"foreignKey:CategoryID" json:"category"`
 
 	Images          []Image               `json:"images" gorm:"foreignKey:ProductID"`

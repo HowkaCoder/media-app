@@ -59,6 +59,9 @@ func (lr *languageRepository) UpdateLanguage(language *entity.Language, id uint)
 	if language.Name != "" {
 		eLanguage.Name = language.Name
 	}
+	if language.MainStatus != eLanguage.MainStatus {
+		eLanguage.MainStatus = language.MainStatus
+	}
 	return lr.db.Save(&eLanguage).Error
 }
 

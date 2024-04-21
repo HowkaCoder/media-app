@@ -87,11 +87,12 @@ func main() {
 
 		return c.SendString("Database reborned")
 	})
-	app.Get("/api/categories", categoryHandler.GetAllCategories)
+	app.Get("/:lang/api/categories", categoryHandler.GetAllCategories)
 	app.Get("/api/categories/:id", categoryHandler.GetCategoryByID)
-	app.Get("/api/products", productHandler.GetAllProducts)
-	app.Get("/api/products/:id", productHandler.GetProductByID)
-	app.Get("/api/categories/:id/products", productHandler.GetProductsByCategory)
+	app.Get("/:lang/api/products", productHandler.GetAllProducts)
+	app.Get("/:lang/api/products/:id", productHandler.GetProductByID)
+	app.Get("/:lang/api/categories/:id/products", productHandler.GetProductsByCategory)
+
 	app.Get("/api/languages", langHandler.GetAllLanguages)
 	app.Get("/api/languages/:id", langHandler.GetLanguageByID)
 	app.Get("/api/products/:product_id/translations", translationHandler.GetProductTranslationsByProductID)

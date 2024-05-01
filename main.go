@@ -15,8 +15,11 @@ import (
 
 func main() {
 
-	db := internal.Init()
+	log.Println("starting server")
 
+	log.Println("database initiating ")
+	db := internal.Init()
+	log.Println("database initiation complete")
 	// CATEGORY
 	categoryRepository := repository.NewCategoryRepository(db)
 	categoryService := service.NewCategoryService()
@@ -45,6 +48,15 @@ func main() {
 	userUsecase := usecase.NewUsersUseCase(userRepository)
 	userHandler := handler.NewUserHandler(userUsecase, userService)
 
+	// Subcategory
+	subcategoryRepository := repository.NewSubCategoryRepository(db)
+	subcategoryUsecase := usecase.NewSubCategoryUseCase(subcategoryRepository)
+	subcategoryHandler := handler.NewSubCategoryHandler(subcategoryUsecase)
+
+	//MainCategory
+	mainCategoryRepository := repository.NewMainCategoryRepository(db)
+	mainCategoryUsecase := usecase.NewMainCategoryUseCase(mainCategoryRepository)
+	mainCategoryHandler := handler.NewMainCategoryHandler(mainCategoryUsecase, subcategoryUsecase)
 	app := fiber.New(fiber.Config{
 		BodyLimit: 100 * 1024 * 1024,
 	})
@@ -92,6 +104,18 @@ func main() {
 	app.Get("/:lang/api/products", productHandler.GetAllProducts)
 	app.Get("/:lang/api/products/:id", productHandler.GetProductByID)
 	app.Get("/:lang/api/categories/:id/products", productHandler.GetProductsByCategory)
+
+	app.Get("/api/subcategories", subcategoryHandler.GetAllSubCategories)
+	app.Get("/api/subcategories/:id", subcategoryHandler.GetSubCategoryByID)
+	app.Post("/api/subcategories", subcategoryHandler.CreateSubCategory)
+	app.Patch("/api/subcategories/:id", subcategoryHandler.UpdateSubCategory)
+	app.Delete("/api/subcategories/:id", subcategoryHandler.DeleteSubCategory)
+
+	app.Get("/:lang/api/maincategories", mainCategoryHandler.GetAllMainCategories)
+	app.Post("/:lang/api/maincategories", mainCategoryHandler.CreateMainCategory)
+	app.Get("/:lang/api/maincategories/:id", mainCategoryHandler.GetSingleMainCategory)
+	app.Patch("/:lang/api/maincategories/:id", mainCategoryHandler.UpdateMainCategory)
+	app.Delete("/:lang/api/maincategories/:id", mainCategoryHandler.DeleteMainCategory)
 
 	app.Get("/api/languages", langHandler.GetAllLanguages)
 	app.Get("/api/languages/:id", langHandler.GetLanguageByID)

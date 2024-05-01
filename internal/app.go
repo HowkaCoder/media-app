@@ -61,5 +61,16 @@ func Init() *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	err = DB.AutoMigrate(&entity.SubCategory{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = DB.AutoMigrate(&entity.MainCategory{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return DB
 }

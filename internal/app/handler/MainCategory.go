@@ -55,6 +55,7 @@ func (mh *MainCategoryHandler) CreateMainCategory(c *fiber.Ctx) error {
 
 		subCategory.MainCategoryID = request.MainCategory.ID
 
+		log.Println(subCategory)
 		if err := mh.SubCategoryUsecase.CreateSubCategory(&subCategory); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error  #3": err.Error()})
 		}

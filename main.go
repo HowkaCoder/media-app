@@ -20,16 +20,10 @@ func main() {
 	log.Println("database initiating ")
 	db := internal.Init()
 	log.Println("database initiation complete")
-	// CATEGORY
-	categoryRepository := repository.NewCategoryRepository(db)
-	categoryService := service.NewCategoryService()
-	categoryUsecase := usecase.NewCategoryUseCase(categoryRepository, categoryService)
-	categoryHandler := handler.NewCategoryHandler(categoryUsecase)
 
 	// PRODUCT
 	productRepository := repository.NewProductRepository(db)
-	productService := service.NewProductService(categoryRepository)
-	productUsecase := usecase.NewProductUseCase(productRepository, productService)
+	productUsecase := usecase.NewProductUseCase(productRepository)
 	productHandler := handler.NewProductHandler(productUsecase)
 
 	// LANGUAGE
@@ -57,6 +51,11 @@ func main() {
 	mainCategoryRepository := repository.NewMainCategoryRepository(db)
 	mainCategoryUsecase := usecase.NewMainCategoryUseCase(mainCategoryRepository)
 	mainCategoryHandler := handler.NewMainCategoryHandler(mainCategoryUsecase, subcategoryUsecase)
+
+	// Order
+	orderRepository := repository.NewOrderRepository(db)
+	orderUsecase := usecase.NewOrderUseCase(orderRepository)
+	orderHandler := handler.NewOrderHandler(orderUsecase, userUsecase)
 	app := fiber.New(fiber.Config{
 		BodyLimit: 100 * 1024 * 1024,
 	})
@@ -99,8 +98,6 @@ func main() {
 
 		return c.SendString("Database reborned")
 	})
-	app.Get("/:lang/api/categories", categoryHandler.GetAllCategories)
-	app.Get("/api/categories/:id", categoryHandler.GetCategoryByID)
 	app.Get("/:lang/api/products", productHandler.GetAllProducts)
 	app.Get("/:lang/api/products/:id", productHandler.GetProductByID)
 	app.Get("/:lang/api/categories/:id/products", productHandler.GetProductsByCategory)
@@ -122,12 +119,14 @@ func main() {
 	app.Get("/api/products/:product_id/translations", translationHandler.GetProductTranslationsByProductID)
 	app.Get("/api/characteristics/:characteristic_id/translations", translationHandler.GetCharacteristicTranslationsByCharacteristicID)
 
+	app.Get("/api/orders", orderHandler.GetAllOrders)
+	app.Get("/api/orders/:id", orderHandler.GetOrderById)
+	app.Post("/api/orders", orderHandler.CreateOrder)
+	app.Patch("/api/orders/:id", orderHandler.UpdateOrder)
+	app.Delete("/api/orders/:id", orderHandler.DeleteOrder)
+
 	api := app.Group("/api", userHandler.AuthenticateToken)
 	//api := app.Group("/api")
-	api.Post("/categories", userHandler.AuthorizeRole("admin"), categoryHandler.CreateCategory)
-	api.Patch("/categories/:id", userHandler.AuthorizeRole("admin"), categoryHandler.UpdateCategory)
-	api.Delete("/categories/:id", userHandler.AuthorizeRole("admin"), categoryHandler.DeleteCategory)
-
 	api.Post("/products", userHandler.AuthorizeRole("admin"), productHandler.CreateProduct)
 	api.Patch("/products/:id", userHandler.AuthorizeRole("admin"), productHandler.UpdateProduct)
 	api.Delete("/products/:id", userHandler.AuthorizeRole("admin"), productHandler.DeleteProduct)

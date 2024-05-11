@@ -3,7 +3,6 @@ package usecase
 import (
 	"media-app/internal/app/entity"
 	"media-app/internal/app/repository"
-	"media-app/internal/app/service"
 )
 
 type ProductUseCase interface {
@@ -37,12 +36,11 @@ type ProductUseCase interface {
 }
 
 type productUseCase struct {
-	productRepo    repository.ProductRepository
-	productService service.ProductService
+	productRepo repository.ProductRepository
 }
 
-func NewProductUseCase(repo repository.ProductRepository, productService service.ProductService) *productUseCase {
-	return &productUseCase{productRepo: repo, productService: productService}
+func NewProductUseCase(repo repository.ProductRepository) *productUseCase {
+	return &productUseCase{productRepo: repo}
 }
 
 // IMAGE FUNCTIONS
@@ -104,10 +102,10 @@ func (pu *productUseCase) GetAllProducts(language string) ([]entity.Product, err
 
 func (pu *productUseCase) UpdateProduct(product *entity.Product, id uint) error {
 
-	err := pu.productService.ValidateProduct(product)
-	if err != nil {
-		return err
-	}
+	//err := pu.productService.ValidateProduct(product)
+	//if err != nil {
+	//	return err
+	//}
 
 	return pu.productRepo.UpdateProduct(product, id)
 }

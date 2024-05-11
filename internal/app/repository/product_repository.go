@@ -145,9 +145,9 @@ func (pr *productRepository) UpdateProduct(product *entity.Product, id uint) err
 		}
 	}
 
-	if product.CategoryID != nil {
-		if product.CategoryID != eProduct.CategoryID {
-			eProduct.CategoryID = product.CategoryID
+	if product.SubCategoryID != 0 {
+		if product.SubCategoryID != eProduct.SubCategoryID {
+			eProduct.SubCategoryID = product.SubCategoryID
 		}
 	}
 	if product.Discount != 0 {

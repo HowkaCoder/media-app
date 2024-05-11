@@ -50,7 +50,7 @@ func (h *SubCategoryHandler) CreateSubCategory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(subcategory)
+	return c.JSON(fiber.Map{"message": "SubCategory created successfully"})
 }
 
 func (h *SubCategoryHandler) UpdateSubCategory(c *fiber.Ctx) error {
@@ -68,8 +68,7 @@ func (h *SubCategoryHandler) UpdateSubCategory(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(subcategory)
-
+	return c.JSON(fiber.Map{"message": "SubCategory updated successfully"})
 }
 
 func (h *SubCategoryHandler) DeleteSubCategory(c *fiber.Ctx) error {
@@ -80,5 +79,5 @@ func (h *SubCategoryHandler) DeleteSubCategory(c *fiber.Ctx) error {
 	if err := h.subCategoryUsecase.DeleteSubCategory(uint(id)); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
-	return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Message": "subcategory deleted successfully"})
+	return c.JSON(fiber.Map{"Message": "subcategory deleted successfully"})
 }

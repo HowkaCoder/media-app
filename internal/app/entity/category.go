@@ -17,10 +17,11 @@ type MainCategory struct {
 
 type SubCategory struct {
 	gorm.Model
-	ID             uint      ` gorm:"primaryKey ; column:id;autoIncrement;autoIncrement:12345678" json:"id"`
-	CreatedAt      time.Time `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt      time.Time `gorm:"column:updated_at" json:"updated_at"`
-	MainCategoryID uint      `gorm:"not null" json:"category_id"`
-	Value          string    `gorm:"not null" json:"value"`
-	Description    string    `gorm:"not null" json:"description"`
+	ID             uint         ` gorm:"primaryKey ; column:id;autoIncrement;autoIncrement:12345678" json:"id"`
+	CreatedAt      time.Time    `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt      time.Time    `gorm:"column:updated_at" json:"updated_at"`
+	MainCategoryID uint         `gorm:"not null" json:"main_category_id"`
+	Value          string       `gorm:"not null" json:"value"`
+	Description    string       `gorm:"not null" json:"description"`
+	MainCategory   MainCategory `gorm:"foreignKey:MainCategoryID" json:"main_category"`
 }

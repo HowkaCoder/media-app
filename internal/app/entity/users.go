@@ -24,7 +24,7 @@ type User struct {
 	Address   string         `gorm:"not null" json:"address"`
 	Password  string         `gorm:"not null" json:"password"`
 	Role      string         `gorm:"not null" json:"role"`
-	Ava       string         `gorm:"not null" json:"ava"`
+	Ava       string         `gorm:"null" json:"ava"`
 }
 
 type JWTCredentials struct {

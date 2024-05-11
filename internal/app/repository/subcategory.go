@@ -23,7 +23,7 @@ func NewSubCategoryRepository(db *gorm.DB) *subCategoryRepository {
 
 func (r *subCategoryRepository) GetAllSubCategories() ([]entity.SubCategory, error) {
 	var subCategory []entity.SubCategory
-	if err := r.db.Find(&subCategory).Error; err != nil {
+	if err := r.db.Preload("MainCategory").Find(&subCategory).Error; err != nil {
 		return nil, err
 	}
 	return subCategory, nil
@@ -31,14 +31,14 @@ func (r *subCategoryRepository) GetAllSubCategories() ([]entity.SubCategory, err
 
 func (r *subCategoryRepository) GetSubCategoryById(id uint) (*entity.SubCategory, error) {
 	var subCategory *entity.SubCategory
-	if err := r.db.First(&subCategory, id).Error; err != nil {
+	if err := r.db.Preload("MainCategory").First(&subCategory, id).Error; err != nil {
 		return nil, err
 	}
 	return subCategory, nil
 }
 
 func (r *subCategoryRepository) CreateSubCategory(subCategory *entity.SubCategory) error {
-	if err := r.db.Create(subCategory).Error; err != nil {
+	if err := r.db.Create(&subCategory).Error; err != nil {
 		return err
 	}
 	return nil

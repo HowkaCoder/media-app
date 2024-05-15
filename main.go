@@ -125,6 +125,10 @@ func main() {
 	app.Patch("/api/orders/:id", orderHandler.UpdateOrder)
 	app.Delete("/api/orders/:id", orderHandler.DeleteOrder)
 
+	app.Get("/users-profile", userHandler.GetUserProfile)
+	app.Get("/users", userHandler.GetAllUsers)
+	app.Get("/users/:id", userHandler.GetUserByID)
+
 	api := app.Group("/api", userHandler.AuthenticateToken)
 	//api := app.Group("/api")
 	api.Post("/products", userHandler.AuthorizeRole("admin"), productHandler.CreateProduct)
@@ -143,9 +147,6 @@ func main() {
 	api.Patch("/translations/characteristic/:id", userHandler.AuthorizeRole("admin"), translationHandler.UpdateCharacteristicTranslation)
 	api.Delete("/translations/characteristic/:id", userHandler.AuthorizeRole("admin"), translationHandler.DeleteCharacteristicTranslation)
 
-	api.Get("/users-profile", userHandler.AuthorizeRole("user"), userHandler.GetUserProfile)
-	api.Get("/users", userHandler.AuthorizeRole("admin"), userHandler.GetAllUsers)
-	api.Get("/users/:id", userHandler.GetUserByID)
 	api.Patch("/users/:id", userHandler.AuthorizeRole("user"), userHandler.UpdateUser)
 	api.Delete("/users/:id", userHandler.AuthorizeRole("user"), userHandler.DeleteUser)
 

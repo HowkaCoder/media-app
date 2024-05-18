@@ -98,9 +98,9 @@ func main() {
 
 		return c.SendString("Database reborned")
 	})
-	app.Get("/:lang/api/products", productHandler.GetAllProducts)
-	app.Get("/:lang/api/products/:id", productHandler.GetProductByID)
-	app.Get("/:lang/api/categories/:id/products", productHandler.GetProductsByCategory)
+	app.Get("/api/:lang/products", productHandler.GetAllProducts)
+	app.Get("/api/:lang/products/:id", productHandler.GetProductByID)
+	app.Get("/api/:lang/categories/:id/products", productHandler.GetProductsByCategory)
 
 	app.Get("/api/subcategories", subcategoryHandler.GetAllSubCategories)
 	app.Get("/api/subcategories/:id", subcategoryHandler.GetSubCategoryByID)
@@ -127,9 +127,9 @@ func main() {
 
 	api := app.Group("/api", userHandler.AuthenticateToken)
 	//api := app.Group("/api")
-	api.Post("/products", userHandler.AuthorizeRole("admin"), productHandler.CreateProduct)
-	api.Patch("/products/:id", userHandler.AuthorizeRole("admin"), productHandler.UpdateProduct)
-	api.Delete("/products/:id", userHandler.AuthorizeRole("admin"), productHandler.DeleteProduct)
+	api.Post("/:lang/products", userHandler.AuthorizeRole("admin"), productHandler.CreateProduct)
+	api.Patch("/:lang/products/:id", userHandler.AuthorizeRole("admin"), productHandler.UpdateProduct)
+	api.Delete("/:lang/products/:id", userHandler.AuthorizeRole("admin"), productHandler.DeleteProduct)
 
 	api.Post("/languages", userHandler.AuthorizeRole("admin"), langHandler.CreateLanguage)
 	api.Patch("/languages/:id", userHandler.AuthorizeRole("admin"), langHandler.UpdateLanguage)

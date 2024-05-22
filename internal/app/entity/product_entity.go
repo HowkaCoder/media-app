@@ -11,7 +11,7 @@ type Product struct {
 	CreatedAt     time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt     time.Time      `gorm:"column:updated_at" json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
-	SubCategoryID uint           `gorm:"not null" json:"main_category_id"`
+	SubCategoryID uint           `gorm:"not null" json:"category_id"`
 	Name          string         `gorm:"not null" json:"name"`
 	Description   string         `gorm:"not null" json:"description"`
 	Price         uint           `gorm:"not null" json:"price"`

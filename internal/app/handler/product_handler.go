@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/kolesa-team/go-webp/encoder"
+	"github.com/kolesa-team/go-webp/webp"
+	"image/jpeg"
 	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/usecase"
@@ -82,6 +85,7 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Unsupported image format"})
 		}
 		fileName := uuid.New().String() + imageFormat
+		FileName := uuid.New().String() + ".webp"
 		log.Println("...............Image FileName...............")
 
 		file, err := os.Create("images/" + fileName)
@@ -96,9 +100,38 @@ func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 		}
 
+		file1, err := os.Open("images/" + fileName)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		img1, err := jpeg.Decode(file1)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		output, err := os.Create("images/" + FileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer output.Close()
+
+		options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := webp.Encode(output, img1, options); err != nil {
+			log.Fatalln(err)
+		}
+
+		if err := os.Remove("images/" + fileName); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error #3": err.Error()})
+		}
+
 		image := entity.Image{
 			ProductID: request.Product.ID,
-			Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", fileName),
+			Path:      fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", FileName),
 		}
 
 		log.Println("...............Entity Image...............")

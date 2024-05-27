@@ -3,6 +3,10 @@ FROM golang:latest
 
 # Set the working directory inside the container
 WORKDIR /app
+RUN apt-get update && \
+    apt-get install -y libwebp-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy all files from the current directory (.) into the working directory (/app) inside the container
 COPY . .

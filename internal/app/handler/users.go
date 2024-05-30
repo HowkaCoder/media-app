@@ -175,33 +175,8 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	//}
 	//
 	//user.Password = string(hashedPassword)
-	FileName := uuid.New().String() + ".webp"
-	file1, err := os.Open("images/" + image)
-	if err != nil {
-		log.Fatalln(err)
-	}
 
-	img, err := jpeg.Decode(file1)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	output, err := os.Create("images/" + FileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer output.Close()
-
-	options, err := encoder.NewLossyEncoderOptions(encoder.PresetDefault, 75)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	if err := webp.Encode(output, img, options); err != nil {
-		log.Fatalln(err)
-	}
-
-	user.Ava = fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", FileName)
+	user.Ava = fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image)
 
 	if err := uh.userUsecase.CreateUser(&user); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})

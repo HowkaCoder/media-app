@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
@@ -75,18 +74,5 @@ func Init() *gorm.DB {
 		log.Fatal(err)
 	}
 
-	var tables []string
-	DB.Raw("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").Scan(&tables)
-
-	for _, table := range tables {
-		var autoIncrementField string
-		DB.Raw(fmt.Sprintf("PRAGMA table_info(%s)", table)).Scan(&autoIncrementField)
-  
-		if autoIncrementField != "" {
-			sql := fmt.Sprintf("UPDATE sqlite_sequence SET seq = 12345677 WHERE name = '%s'", table)
-			DB.Exec(sql)
-			DB.Exec(fmt.Sprintf("INSERT INTO sqlite_sequence (name, seq) SELECT '%s', 12345677 WHERE NOT EXISTS (SELECT 1 FROM sqlite_sequence WHERE name = '%s')", table, table))
-		}
-	}
 	return DB
 }

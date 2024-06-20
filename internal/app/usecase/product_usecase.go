@@ -18,7 +18,7 @@ type ProductUseCase interface {
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
-
+	GetProductsSorterByThreeParams(name , price , discount string ) ([]entity.Product, error)
 	// IMAGE - CRUD FUNCTIONS
 
 	CreateImage(image *entity.Image) error
@@ -84,6 +84,12 @@ func (pu *productUseCase) DeleteCharacteristic(id uint) error {
 }
 
 // PRODUCT FUNCTIONS
+
+
+func (pu *productUseCase) GetProductsSorterByThreeParams(name , price , discount string) ([]entity.Product , error ) {
+	return pu.productRepo.GetProductsSortedByThreeParams(name , price , discount)
+}
+
 
 func (pu *productUseCase) CreateProduct(product *entity.Product) error {
 	//pu.productService.ValidateProduct(product)

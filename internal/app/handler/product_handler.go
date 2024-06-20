@@ -615,6 +615,23 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 	})
 }
 
+
+
+func (ph *ProductHandler) GetProductsSortedByThreeParams(c *fiber.Ctx) error {
+	name := c.Query("name")
+	price := c.Query("price")
+	discount := c.Query("discount")
+
+	products , err := ph.productUsecase.GetProductsSorterByThreeParams(name , price , discount)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error 1":err.Error})
+	}
+
+	return c.JSON(products)
+}
+
+
+
 func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 
 	language := c.Params("lang")

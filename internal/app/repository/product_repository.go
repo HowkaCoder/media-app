@@ -9,6 +9,7 @@ import (
 type ProductRepository interface {
 
 	// PRODUCT - CRUD FUNCTIONS
+	GetProductsSortedByThreeParams(name , price , discount string) ([]entity.Product , error)
 	GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint, language string) ([]entity.Product, error)
 	GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error)
 	GetProductsByCharacteristics(value, description, language string) ([]entity.Product, error)
@@ -132,6 +133,56 @@ func (pr *productRepository) UpdateCharacteristic(characteristic entity.Characte
 }
 
 // PRODUCT FUNCTIONS
+
+
+func (pr *productRepository) GetProductsSortedByThreeParams(name , price , discount string) ([]entity.Product , error) {
+	var products []entity.Product
+
+	query := pr.db.Model(&entity.Product{})
+
+	if name != ""  {
+		if name == "asc" {
+			query = query.Order("name asc")
+		} else if name == "desc" {
+			query = query.Order("name desc")
+		}
+	}
+		
+	if price != "" {
+		if price == "asc" {
+			query = query.Order("price asc")
+		} else if price == "desc" {
+			query = query.Order("price desc")
+		}
+	}
+
+	if discount != "" {
+		if discount == "asc" {
+			query = query.Order("discount asc")
+		} else if discount == "desc" {
+			query = query.Order("discount desc")
+		}
+	}
+
+	if err := query.Find(&products).Error; err != nil {
+		return nil , err
+	}
+
+	return products,nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 func (pr *productRepository) CreateProduct(product *entity.Product) error {
 	return pr.db.Create(product).Error

@@ -32,7 +32,8 @@ func main() {
 	langHandler := handler.NewLanguageHandler(langUsecase)
 
 	// TRANSLATION
-	translationRepository := repository.NewTranslationRepository(db)
+
+  translationRepository := repository.NewTranslationRepository(db)
 	translationUsecase := usecase.NewTranslationUseCase(translationRepository)
 	translationHandler := handler.NewTranslationHandler(translationUsecase)
 
@@ -114,6 +115,7 @@ func main() {
 	app.Patch("/:lang/api/maincategories/:id", mainCategoryHandler.UpdateMainCategory)
 	app.Delete("/:lang/api/maincategories/:id", mainCategoryHandler.DeleteMainCategory)
 
+	app.Get("/api/:lang/productss" , productHandler.GetProductsSortedByThreeParams)
 	app.Get("/api/languages", langHandler.GetAllLanguages)
 	app.Get("/api/languages/:id", langHandler.GetLanguageByID)
 	app.Get("/api/products/:product_id/translations", translationHandler.GetProductTranslationsByProductID)
@@ -130,6 +132,9 @@ func main() {
 	api.Post("/:lang/products", userHandler.AuthorizeRole("admin"), productHandler.CreateProduct)
 	api.Patch("/:lang/products/:id", userHandler.AuthorizeRole("admin"), productHandler.UpdateProduct)
 	api.Delete("/:lang/products/:id", userHandler.AuthorizeRole("admin"), productHandler.DeleteProduct)
+
+
+	
 
 	api.Post("/languages", userHandler.AuthorizeRole("admin"), langHandler.CreateLanguage)
 	api.Patch("/languages/:id", userHandler.AuthorizeRole("admin"), langHandler.UpdateLanguage)

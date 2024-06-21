@@ -20,7 +20,7 @@ func NewUserService() UserService { return &userService{} }
 func (s *userService) GenerateAccessToken(user *entity.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, entity.JWTCredentials{
 		UserID:    user.ID,
-		Username:  user.Firstname,
+		Username:  user.Username,
 		Role:      user.Role,
 		Firstname: user.Firstname,
 		Lastname:  user.Lastname,
@@ -46,7 +46,7 @@ func (s *userService) ValidateCreateUser(user *entity.User) error {
 func (s *userService) GenerateRefreshToken(user *entity.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, entity.JWTCredentials{
 		UserID:    user.ID,
-		Username:  user.Firstname,
+		Username:  user.Username,
 		Role:      user.Role,
 		Firstname: user.Firstname,
 		Lastname:  user.Lastname,

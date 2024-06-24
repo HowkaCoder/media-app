@@ -163,7 +163,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	var user entity.User
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status":fiber.StatusBadRequest , "data": err.Error() })
 	}
 	//hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	//if err != nil {
@@ -175,7 +175,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	//user.Ava = fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image)
 
 	if err := uh.userUsecase.CreateUser(&user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status":fiber.StatusInternalServerError , "data": err.Error()})
 	}
 
 	return c.JSON(fiber.Map{
@@ -186,12 +186,12 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	var logins login
 	if err := c.BodyParser(&logins); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Message": "Bad request", "Error": err})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"status":fiber.StatusBadRequest , "data": err.Error()})
 	}
 
 	user, err := uh.userUsecase.FindUserByUsername(logins.Username)
 	if err != nil {
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{"Error": "User not found"})
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"status":fiber.StatusNotFound , "data": err.Error()})
 	}
 
 	//if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(logins.Password)); err != nil {
@@ -199,7 +199,7 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	//}
 
 	if user.Password != logins.Password {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password Error"})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"status":fiber.StatusBadRequest , "data": err.Error()})
 	}
 	accessToken, err := uh.userService.GenerateAccessToken(user)
 	if err != nil {

@@ -14,6 +14,7 @@ type ProductRepository interface {
 	GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error)
 	GetProductsByCharacteristics(value, description, language string) ([]entity.Product, error)
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
+	GetProductsByFilter(param string , minPrice uint , maxPrice uint , categoryID uint) ([]entity.Product , error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int, language string) ([]entity.Product, error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
@@ -133,6 +134,47 @@ func (pr *productRepository) UpdateCharacteristic(characteristic entity.Characte
 }
 
 // PRODUCT FUNCTIONS
+
+
+
+func (pr *productRepository) GetProductsByFilter(param string , minPrice uint , maxPrice uint , categoryID uint) ([]entity.Product , error) {
+	var products []entity.Product
+	var order string
+	if param == "Name" {
+		order = "name ASC"
+	} else if param == "eName" {
+		order = "name DESC"
+	}
+
+	if param == "Discount" {
+		order = "discount ASC"
+	} else if param == "eDiscount" {
+		order = "discount DESC"
+	}
+
+	if param == "Price" {
+		order = "price ASC"
+	} else if param == "ePrice" { 
+		order = "price DESC"
+	}
+
+
+	if order == "" {
+		if err := pr.db.Where("category_id = ? AND price >= ? AND price <= ?" , categoryID , minPrice , maxPrice).Preload("Images").Preload("Characteristics").Preload("Category").Find(&products); err != nil {
+			return nil , err.Error 
+     }
+	} else if order != "" {
+		if err := pr.db.Where("category_id = ? AND price >= ? AND price <= ? " , categoryID , minPrice , maxPrice).Order(order).Preload("Images").Preload("Characteristics").Preload("Category").Find(&products); err != nil {
+			return nil , err.Error
+		}
+
+	}
+
+
+	return products , nil
+
+
+}
 
 
 func (pr *productRepository) GetProductsSortedByThreeParams(name , price , discount string) ([]entity.Product , error) {

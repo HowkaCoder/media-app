@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
-	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
@@ -52,65 +49,22 @@ func (uh *UsersHandler) GetUserByID(c *fiber.Ctx) error {
 }
 
 func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
-	id, err := strconv.Atoi(c.Params("id"))
+
+	id , err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status":fiber.StatusBadRequest , "data":err.Error()})
 	}
 
-	form, err := c.MultipartForm()
-	if err != nil {
-		return err
+	var user entity.User
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status":fiber.StatusBadRequest , "data":err.Error()})
+	}
+	fmt.Println(user)
+	if err := uh.userUsecase.UpdateUser(&user , uint(id)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status":fiber.StatusInternalServerError , "data":err.Error()})
 	}
 
-	age, _ := strconv.Atoi(form.Value["age"][0])
-	phone, _ := strconv.Atoi(form.Value["phone"][0])
-
-	file, err := c.FormFile("ava")
-
-	if err != nil {
-		log.Println("Error in uploading Image : ", err)
-		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
-
-	}
-
-	uniqueId := uuid.New()
-
-	filename := strings.Replace(uniqueId.String(), "-", "", -1)
-
-	fileExt := strings.Split(file.Filename, ".")[1]
-
-	image := fmt.Sprintf("%s.%s", filename, fileExt)
-
-	err = c.SaveFile(file, fmt.Sprintf("./images/%s", image))
-
-	if err != nil {
-		log.Println("Error in saving Image :", err)
-
-		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
-	}
-	user := &entity.User{
-		Username:  form.Value["username"][0],
-		Firstname: form.Value["firstname"][0],
-		Lastname:  form.Value["lastname"][0],
-		Age:       uint(age),
-		Phone:     uint(phone),
-		Address:   form.Value["address"][0],
-		Password:  form.Value["password"][0],
-		Ava:       fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image),
-		Role:      form.Value["role"][0],
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	user.Password = string(hashedPassword)
-
-	if err := uh.userUsecase.UpdateUser(user, uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
-	}
-
-	return c.JSON(fiber.Map{"message": "Successfully updated user"})
+	return c.JSON(fiber.Map{"message":"successfully updated"})
 }
 
 func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
@@ -214,8 +168,9 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
-		"status":        user.Role,
+		"role":        user.Role,
 		"username":user.Username,
+		"status":fiber.StatusOK,
 	})
 }
 

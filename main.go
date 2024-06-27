@@ -152,7 +152,7 @@ func main() {
 	api.Get("/users-profile", userHandler.AuthorizeRole("user"), userHandler.GetUserProfile)
 	api.Get("/users", userHandler.AuthorizeRole("admin"), userHandler.GetAllUsers)
 	api.Get("/users/:id", userHandler.GetUserByID)
-	api.Patch("/users/:id", userHandler.AuthorizeRole("user"), userHandler.UpdateUser)
+	api.Patch("/users/:id", userHandler.UpdateUser)
 	api.Delete("/users/:id", userHandler.AuthorizeRole("admin"), userHandler.DeleteUser)
 
 	log.Println("Server is runnig on " + getPort())

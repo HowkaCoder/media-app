@@ -157,14 +157,18 @@ func (pr *productRepository) GetProductsByFilter(param string , minPrice uint , 
 	} else if param == "ePrice" { 
 		order = "price DESC"
 	}
-
+	
+	query := pr.db.Model(&entity.Product{})
+	if categoryID != 0 {
+		query = query.Where("category_id = ?" , categoryID)
+	}
 
 	if order == "" {
-		if err := pr.db.Where("category_id = ? AND price >= ? AND price <= ?" , categoryID , minPrice , maxPrice).Preload("Images").Preload("Characteristics").Preload("Category").Find(&products); err != nil {
+		if err := pr.db.Where("price >= ? AND price <= ?" , minPrice , maxPrice).Preload("Images").Preload("Characteristics").Preload("Category").Find(&products); err != nil {
 			return nil , err.Error 
      }
 	} else if order != "" {
-		if err := pr.db.Where("category_id = ? AND price >= ? AND price <= ? " , categoryID , minPrice , maxPrice).Order(order).Preload("Images").Preload("Characteristics").Preload("Category").Find(&products); err != nil {
+		if err := pr.db.Where("price >= ? AND price <= ? ", minPrice , maxPrice).Order(order).Preload("Images").Preload("Characteristics").Preload("Category").Find(&products); err != nil {
 			return nil , err.Error
 		}
 

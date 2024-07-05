@@ -27,30 +27,6 @@ func NewProductHandler(useCase usecase.ProductUseCase) *ProductHandler {
 	return &ProductHandler{productUsecase: useCase}
 }
 
-
-func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
-	param := c.Query("param")
-	minPrice , err := strconv.Atoi(c.Query("minPrice"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error1 ": err.Error()})
-	}
-	maxPrice , err := strconv.Atoi(c.Query("maxPrice"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error2":err.Error()})
-	}
-	categoryID , err := strconv.Atoi(c.Query("categoryID"))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error3":err.Error()})
-	}
-
-	products , err := ph.productUsecase.GetProductsByFilter(param , uint(minPrice) , uint(maxPrice) , uint(categoryID))
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error4":err.Error()})
-	}
-	return c.JSON(products)
-
-}
-
 func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 
 	c.Set("Access-Control-Allow-Origin", "*")
@@ -641,6 +617,22 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 
 
+
+func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
+	param := c.Query("param")
+	minPrice , _ := strconv.Atoi(c.Query("minPrice"))
+	maxPrice , _ := strconv.Atoi(c.Query("maxPrice"))
+	subcategoryID , _ := strconv.Atoi(c.Query("categoryID"))
+
+	products , err := ph.productUsecase.GetProductByFilter(param , uint(minPrice) , uint(maxPrice) , uint(subcategoryID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error":err.Error()})
+	}
+
+	return c.JSON(products)
+}
+
+
 func (ph *ProductHandler) GetProductsSortedByThreeParams(c *fiber.Ctx) error {
 	name := c.Query("name")
 	price := c.Query("price")
@@ -653,6 +645,8 @@ func (ph *ProductHandler) GetProductsSortedByThreeParams(c *fiber.Ctx) error {
 
 	return c.JSON(products)
 }
+
+
 
 
 

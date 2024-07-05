@@ -14,8 +14,8 @@ type ProductUseCase interface {
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int, language string) ([]entity.Product, error)
+	GetProductByFilter(param string , minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
-	GetProductsByFilter(param string , minPrice uint , maxPrice uint , categoryID uint ) ([]entity.Product , error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
@@ -86,10 +86,11 @@ func (pu *productUseCase) DeleteCharacteristic(id uint) error {
 
 // PRODUCT FUNCTIONS
 
-
-func (pu *productUseCase) GetProductsByFilter(param string , minPrice uint , maxPrice uint , categoryID uint) ([]entity.Product , error) {
-	return pu.productRepo.GetProductsByFilter(param , minPrice , maxPrice , categoryID)
+func (pu *productUseCase) GetProductByFilter(param string ,  minPrice uint , maxPrice uint , subcategoryID uint ) ([]entity.Product , error) { 
+	return pu.productRepo.GetProductsByFilter(param , minPrice , maxPrice , subcategoryID)
 }
+
+
 
 func (pu *productUseCase) GetProductsSorterByThreeParams(name , price , discount string) ([]entity.Product , error ) {
 	return pu.productRepo.GetProductsSortedByThreeParams(name , price , discount)

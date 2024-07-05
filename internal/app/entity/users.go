@@ -34,6 +34,7 @@ type JWTCredentials struct {
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 	Age       uint   `json:"age"`
+	Phone 	  uint   `json:"phone"`
 	Address   string `json:"address"`
 	Password  string `json:"password"`
 	Ava       string `json:"ava"`

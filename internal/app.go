@@ -75,7 +75,7 @@ func Init() *gorm.DB {
 	}
 
     DB.Exec("DELETE FROM sqlite_sequence WHERE name='products'")
-    DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('products', 887283784)")
+    DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('products', 12345678)")
     
 	DB.Exec("DELETE FROM sqlite_sequence WHERE name='main_categories'")
     DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('main_categories, 12345678)")

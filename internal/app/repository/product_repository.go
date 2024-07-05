@@ -14,13 +14,14 @@ type ProductRepository interface {
 	GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error)
 	GetProductsByCharacteristics(value, description, language string) ([]entity.Product, error)
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
-	GetProductsByFilter(param string , minPrice uint , maxPrice uint , categoryID uint) ([]entity.Product , error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int, language string) ([]entity.Product, error)
+	GetProductsByFilter(param string , minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
+	
 
 	// IMAGE - CRUD FUNCTIONS
 
@@ -136,51 +137,6 @@ func (pr *productRepository) UpdateCharacteristic(characteristic entity.Characte
 // PRODUCT FUNCTIONS
 
 
-
-func (pr *productRepository) GetProductsByFilter(param string , minPrice uint , maxPrice uint , categoryID uint) ([]entity.Product , error) {
-	var products []entity.Product
-	var order string
-	if param == "Name" {
-		order = "name ASC"
-	} else if param == "eName" {
-		order = "name DESC"
-	}
-
-	if param == "Discount" {
-		order = "discount ASC"
-	} else if param == "eDiscount" {
-		order = "discount DESC"
-	}
-
-	if param == "Price" {
-		order = "price ASC"
-	} else if param == "ePrice" { 
-		order = "price DESC"
-	}
-	
-	query := pr.db.Model(&entity.Product{})
-	if categoryID != 0 {
-		query = query.Where("category_id = ?" , categoryID)
-	}
-
-	if order == "" {
-		if err := pr.db.Where("price >= ? AND price <= ?" , minPrice , maxPrice).Preload("Images").Preload("Characteristics").Preload("Category").Find(&products); err != nil {
-			return nil , err.Error 
-     }
-	} else if order != "" {
-		if err := pr.db.Where("price >= ? AND price <= ? ", minPrice , maxPrice).Order(order).Preload("Images").Preload("Characteristics").Preload("Category").Find(&products); err != nil {
-			return nil , err.Error
-		}
-
-	}
-
-
-	return products , nil
-
-
-}
-
-
 func (pr *productRepository) GetProductsSortedByThreeParams(name , price , discount string) ([]entity.Product , error) {
 	var products []entity.Product
 
@@ -238,7 +194,7 @@ func (pr *productRepository) UpdateProduct(product *entity.Product, id uint) err
 	var eProduct *entity.Product
 	if err := pr.db.First(&eProduct, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			errors.New("Product not found")
+			return	errors.New("Product not found")
 		}
 	}
 
@@ -311,6 +267,50 @@ func (pr *productRepository) GetProductsByCategoryID(id uint, language string) (
 	}
 	return products, nil
 }
+
+
+func (pr *productRepository) GetProductsByFilter(param string , minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error) {
+
+	var products []entity.Product
+
+	query := pr.db.Model(&entity.Product{})
+
+	// Проверка на наличие значений для фильтрации
+	if subcategoryID != 0 {
+		query = query.Where("subcategory_id = ?", subcategoryID)
+	}
+	if minPrice != 0 {
+		query = query.Where("price >= ?", minPrice)
+	}
+	if maxPrice != 0 {
+		query = query.Where("price <= ?", maxPrice)
+	}
+
+	// Проверка на наличие значений для сортировки
+	switch param {
+	case "Price":
+		query = query.Order("price ASC")
+	case "ePrice":
+		query = query.Order("price DESC")
+	case "Name":
+		query = query.Order("name ASC")
+	case "eName":
+		query = query.Order("name DESC")
+	case "Discount":
+		query = query.Order("discount ASC")
+	case "eDiscount":
+		query = query.Order("discount DESC")
+	default:
+		// Если param не соответствует ни одному из известных значений, не сортировать
+	}
+
+	if err := query.Preload("Category").Preload("Images").Preload("Characteristics").Find(&products).Error; err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
 
 func (pr *productRepository) GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error) {
 	var products []entity.Product

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
+	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
@@ -49,22 +52,65 @@ func (uh *UsersHandler) GetUserByID(c *fiber.Ctx) error {
 }
 
 func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
-
-	id , err := strconv.Atoi(c.Params("id"))
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status":fiber.StatusBadRequest , "data":err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err})
 	}
 
-	var user entity.User
-	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status":fiber.StatusBadRequest , "data":err.Error()})
-	}
-	fmt.Println(user)
-	if err := uh.userUsecase.UpdateUser(&user , uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status":fiber.StatusInternalServerError , "data":err.Error()})
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
 	}
 
-	return c.JSON(fiber.Map{"message":"successfully updated"})
+	age, _ := strconv.Atoi(form.Value["age"][0])
+	phone, _ := strconv.Atoi(form.Value["phone"][0])
+
+	file, err := c.FormFile("ava")
+
+	if err != nil {
+		log.Println("Error in uploading Image : ", err)
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+
+	}
+
+	uniqueId := uuid.New()
+
+	filename := strings.Replace(uniqueId.String(), "-", "", -1)
+
+	fileExt := strings.Split(file.Filename, ".")[1]
+
+	image := fmt.Sprintf("%s.%s", filename, fileExt)
+
+	err = c.SaveFile(file, fmt.Sprintf("./images/%s", image))
+
+	if err != nil {
+		log.Println("Error in saving Image :", err)
+
+		return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
+	}
+	user := &entity.User{
+		Username:  form.Value["username"][0],
+		Firstname: form.Value["firstname"][0],
+		Lastname:  form.Value["lastname"][0],
+		Age:       uint(age),
+		Phone:     uint(phone),
+		Address:   form.Value["address"][0],
+		Password:  form.Value["password"][0],
+		Ava:       fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image),
+		Role:      form.Value["role"][0],
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
+
+	if err := uh.userUsecase.UpdateUser(user, uint(id)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
+	}
+
+	return c.JSON(fiber.Map{"message": "Successfully updated user"})
 }
 
 func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
@@ -117,7 +163,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	var user entity.User
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status":fiber.StatusBadRequest , "data": err.Error() })
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	//hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	//if err != nil {
@@ -129,7 +175,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	//user.Ava = fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image)
 
 	if err := uh.userUsecase.CreateUser(&user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status":fiber.StatusInternalServerError , "data": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 	}
 
 	return c.JSON(fiber.Map{
@@ -140,12 +186,12 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	var logins login
 	if err := c.BodyParser(&logins); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"status":fiber.StatusBadRequest , "data": err.Error()})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Message": "Bad request", "Error": err})
 	}
 
 	user, err := uh.userUsecase.FindUserByUsername(logins.Username)
 	if err != nil {
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{"status":fiber.StatusNotFound , "data": err.Error()})
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"Error": "User not found"})
 	}
 
 	//if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(logins.Password)); err != nil {
@@ -153,7 +199,7 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	//}
 
 	if user.Password != logins.Password {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"status":fiber.StatusBadRequest , "data": err.Error()})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password Error"})
 	}
 	accessToken, err := uh.userService.GenerateAccessToken(user)
 	if err != nil {
@@ -168,9 +214,7 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
-		"role":        user.Role,
-		"username":user.Username,
-		"status":fiber.StatusOK,
+		"status":        user.Role,
 	})
 }
 

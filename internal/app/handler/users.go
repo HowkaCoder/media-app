@@ -2,10 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
@@ -13,7 +9,24 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
+
+type data struct {
+	access_token  string `json:"accessToken"`
+	refresh_token string `json:"refreshToken"`
+	status        string `json:"status"`
+	username      string `json:"username"`
+}
+
+type errorr struct {
+	status  uint   `json:"status"`
+	message string `json:"message"`
+}
 
 type UsersHandler struct {
 	userUsecase usecase.UsersUseCase
@@ -185,13 +198,24 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	var logins login
-	if err := c.BodyParser(&logins); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Message": "Bad request", "Error": err})
+
+	err := c.BodyParser(&logins)
+	var eri = errorr{
+		status:  http.StatusBadRequest,
+		message: err.Error(),
+	}
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"data": eri})
 	}
 
 	user, err := uh.userUsecase.FindUserByUsername(logins.Username)
+
 	if err != nil {
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{"Error": "User not found"})
+		eri = errorr{
+			status:  http.StatusNotFound,
+			message: err.Error(),
+		}
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"data": eri})
 	}
 
 	//if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(logins.Password)); err != nil {
@@ -199,7 +223,11 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	//}
 
 	if user.Password != logins.Password {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password Error"})
+		eri = errorr{
+			status:  http.StatusBadRequest,
+			message: err.Error(),
+		}
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"data": eri})
 	}
 	accessToken, err := uh.userService.GenerateAccessToken(user)
 	if err != nil {
@@ -211,11 +239,14 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 		return err
 	}
 
+	var data = data{
+		access_token:  accessToken,
+		refresh_token: refreshToken,
+		status:        user.Role,
+		username:      user.Username,
+	}
 	return c.JSON(fiber.Map{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"status":        user.Role,
-		"username":user.Username,
+		"data": data,
 	})
 }
 

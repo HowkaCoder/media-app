@@ -215,6 +215,7 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"status":        user.Role,
+		"username":user.Username,
 	})
 }
 

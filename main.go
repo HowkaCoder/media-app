@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"log"
 	"media-app/internal"
 	"media-app/internal/app/handler"
@@ -11,6 +10,8 @@ import (
 	"media-app/internal/app/usecase"
 	"os"
 	"path/filepath"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 
 	// TRANSLATION
 
-  translationRepository := repository.NewTranslationRepository(db)
+	translationRepository := repository.NewTranslationRepository(db)
 	translationUsecase := usecase.NewTranslationUseCase(translationRepository)
 	translationHandler := handler.NewTranslationHandler(translationUsecase)
 
@@ -75,6 +76,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Ошибка при получении текущей директории:", err)
 		return
+
 	}
 	imagesDir := filepath.Join(currentDir, "images")
 
@@ -102,8 +104,8 @@ func main() {
 	app.Get("/api/:lang/products", productHandler.GetAllProducts)
 	app.Get("/api/:lang/products/:id", productHandler.GetProductByID)
 	app.Get("/api/:lang/categories/:id/products", productHandler.GetProductsByCategory)
-	app.Get("/api/:lang/products/filter" ,productHandler.GetProductsByFilter)
-		
+	app.Get("/api/:lang/products/filter", productHandler.GetProductsByFilter)
+
 	app.Get("/api/subcategories", subcategoryHandler.GetAllSubCategories)
 	app.Get("/api/subcategories/:id", subcategoryHandler.GetSubCategoryByID)
 	app.Post("/api/subcategories", subcategoryHandler.CreateSubCategory)
@@ -116,7 +118,7 @@ func main() {
 	app.Patch("/:lang/api/maincategories/:id", mainCategoryHandler.UpdateMainCategory)
 	app.Delete("/:lang/api/maincategories/:id", mainCategoryHandler.DeleteMainCategory)
 
-	app.Get("/api/:lang/productss" , productHandler.GetProductsSortedByThreeParams)
+	app.Get("/api/:lang/productss", productHandler.GetProductsSortedByThreeParams)
 	app.Get("/api/languages", langHandler.GetAllLanguages)
 	app.Get("/api/languages/:id", langHandler.GetLanguageByID)
 	app.Get("/api/products/:product_id/translations", translationHandler.GetProductTranslationsByProductID)
@@ -133,9 +135,6 @@ func main() {
 	api.Post("/:lang/products", userHandler.AuthorizeRole("admin"), productHandler.CreateProduct)
 	api.Patch("/:lang/products/:id", userHandler.AuthorizeRole("admin"), productHandler.UpdateProduct)
 	api.Delete("/:lang/products/:id", userHandler.AuthorizeRole("admin"), productHandler.DeleteProduct)
-
-
-	
 
 	api.Post("/languages", userHandler.AuthorizeRole("admin"), langHandler.CreateLanguage)
 	api.Patch("/languages/:id", userHandler.AuthorizeRole("admin"), langHandler.UpdateLanguage)

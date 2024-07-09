@@ -153,18 +153,19 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	var logins login
 
 	err := c.BodyParser(&logins)
-	var eri = errorr{
-		status:  http.StatusBadRequest,
-		message: err.Error(),
-	}
+
 	if err != nil {
+		var eri = errorr{
+			status:  http.StatusBadRequest,
+			message: err.Error(),
+		}
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"data": eri})
 	}
 
 	user, err := uh.userUsecase.FindUserByUsername(logins.Username)
 
 	if err != nil {
-		eri = errorr{
+		var eri = errorr{
 			status:  http.StatusNotFound,
 			message: err.Error(),
 		}
@@ -176,7 +177,7 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	//}
 
 	if user.Password != logins.Password {
-		eri = errorr{
+		var eri = errorr{
 			status:  http.StatusBadRequest,
 			message: err.Error(),
 		}

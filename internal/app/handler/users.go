@@ -13,13 +13,6 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-type data struct {
-	access_token  string `json:"accessToken"`
-	refresh_token string `json:"refreshToken"`
-	status        string `json:"status"`
-	username      string `json:"username"`
-}
-
 type errorr struct {
 	status  uint   `json:"status"`
 	message string `json:"message"`
@@ -194,10 +187,11 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"data": data{
-			access_token:  accessToken,
-			refresh_token: refreshToken,
-		},
+
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+		"status":        user.Role,
+		"username":      user.Username,
 	})
 }
 

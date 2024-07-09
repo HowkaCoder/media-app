@@ -1,13 +1,14 @@
 package repository
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"media-app/internal/app/entity"
 )
 
 type OrderRepository interface {
-	GetAllSubOrders() ([]entity.Order, error)
-	GetOrderById(id uint) (*entity.Order, error)
+	GetAllOrders() ([]entity.Order, error)
+	GetOrderByID(id uint) (*entity.Order, error)
 	CreateOrder(order *entity.Order) error
 	UpdateOrder(order *entity.Order, id uint) error
 	DeleteOrder(id uint) error
@@ -21,58 +22,47 @@ func NewOrderRepository(db *gorm.DB) *orderRepository {
 	return &orderRepository{db: db}
 }
 
-func (r *orderRepository) GetAllSubOrders() ([]entity.Order, error) {
-	var order []entity.Order
-	if err := r.db.Preload("Product").Preload("User").Find(&order).Error; err != nil {
+func (or *orderRepository) GetAllOrders() ([]entity.Order, error) {
+	var orders []entity.Order
+	if err := or.db.Preload("Products.Image").Find(&orders).Error; err != nil {
 		return nil, err
 	}
-	return order, nil
+	return orders, nil
 }
 
-func (r *orderRepository) GetOrderById(id uint) (*entity.Order, error) {
-	var order *entity.Order
-	if err := r.db.Preload("Product").Preload("User").First(&order, id).Error; err != nil {
+func (or *orderRepository) GetOrderByID(id uint) (*entity.Order, error) {
+	var order entity.Order
+	if err := or.db.Preload("Products.Image").First(&order, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("Record not found")
+		}
 		return nil, err
 	}
-	return order, nil
+	return &order, nil
 }
 
-func (r *orderRepository) CreateOrder(order *entity.Order) error {
-	if err := r.db.Create(&order).Error; err != nil {
-		return err
-	}
-	return nil
+func (or *orderRepository) CreateOrder(order *entity.Order) error {
+	return or.db.Create(&order).Error
 }
 
-func (r *orderRepository) UpdateOrder(order *entity.Order, id uint) error {
-	var eOrder *entity.Order
-	if err := r.db.First(&eOrder, id).Error; err != nil {
+func (or *orderRepository) UpdateOrder(order *entity.Order, id uint) error {
+	var existingOrder entity.Order
+	if err := or.db.First(&existingOrder, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("Record not found")
+		}
 		return err
 	}
-
-	if order.Status != "" {
-		eOrder.Status = order.Status
-	}
-	if order.ProductID != 0 {
-		eOrder.ProductID = order.ProductID
-	}
-	if order.UserID != 0 {
-		eOrder.UserID = order.UserID
-	}
-
-	if err := r.db.Save(eOrder).Error; err != nil {
-		return err
-	}
-	return nil
+	return or.db.Model(&existingOrder).Updates(order).Error
 }
 
-func (r *orderRepository) DeleteOrder(id uint) error {
-	var eOrder *entity.Order
-	if err := r.db.First(&eOrder, id).Error; err != nil {
+func (or *orderRepository) DeleteOrder(id uint) error {
+	var order entity.Order
+	if err := or.db.First(&order, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("Record not found")
+		}
 		return err
 	}
-	if err := r.db.Delete(eOrder).Error; err != nil {
-		return err
-	}
-	return nil
+	return or.db.Delete(&order).Error
 }

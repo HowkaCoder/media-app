@@ -17,13 +17,6 @@ func NewLanguageHandler(languageUsecase usecase.LanguageUseCase) *languageHandle
 		languageUseCase: languageUsecase,
 	}
 }
-
-// GetAllLanguages получает все языки.
-// @Summary Получить все языки
-// @Tags Languages
-// @Produce json
-// @Success 200 {array} []entity.Language
-// @Router /api/languages [get]
 func (h *languageHandler) GetAllLanguages(c *fiber.Ctx) error {
 	languages, err := h.languageUseCase.GetAllLanguages()
 	if err != nil {

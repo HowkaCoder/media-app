@@ -21,22 +21,22 @@ func NewOrderUseCase(orderRepository repository.OrderRepository) *orderUseCase {
 	return &orderUseCase{repo: orderRepository}
 }
 
-func (lu *orderUseCase) GetAllOrders() ([]entity.Order, error) {
-	return lu.repo.GetAllSubOrders()
+func (ou *orderUseCase) GetAllOrders() ([]entity.Order, error) {
+	return ou.repo.GetAllOrders()
 }
 
-func (lu *orderUseCase) GetOrderByID(id uint) (*entity.Order, error) {
-	return lu.repo.GetOrderById(id)
+func (ou *orderUseCase) GetOrderByID(id uint) (*entity.Order, error) {
+	return ou.repo.GetOrderByID(id)
 }
 
-func (lu *orderUseCase) CreateOrder(order *entity.Order) error {
-	return lu.repo.CreateOrder(order)
+func (ou *orderUseCase) CreateOrder(order *entity.Order) error {
+	return ou.repo.CreateOrder(order)
 }
 
-func (lu *orderUseCase) UpdateOrder(order *entity.Order, id uint) error {
-	return lu.repo.UpdateOrder(order, id)
+func (ou *orderUseCase) UpdateOrder(order *entity.Order, id uint) error {
+	return ou.repo.UpdateOrder(order, id)
 }
 
-func (lu *orderUseCase) DeleteOrder(id uint) error {
-	return lu.repo.DeleteOrder(id)
+func (ou *orderUseCase) DeleteOrder(id uint) error {
+	return ou.repo.DeleteOrder(id)
 }

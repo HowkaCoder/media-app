@@ -23,6 +23,10 @@ func Init() *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = DB.AutoMigrate(&entity.OrderProduct{})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = DB.AutoMigrate(&entity.Characteristic{})
 	if err != nil {
@@ -74,26 +78,21 @@ func Init() *gorm.DB {
 		log.Fatal(err)
 	}
 
-    DB.Exec("DELETE FROM sqlite_sequence WHERE name='products'")
-    DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('products', 12345678)")
-    
-	DB.Exec("DELETE FROM sqlite_sequence WHERE name='main_categories'")
-    DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('main_categories, 12345678)")
+	DB.Exec("DELETE FROM sqlite_sequence WHERE name='products'")
+	DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('products', 12345678)")
 
-	mn := entity.MainCategory{ID:12345678,Name:"32432d2d23d23"}
+	DB.Exec("DELETE FROM sqlite_sequence WHERE name='main_categories'")
+	DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('main_categories, 12345678)")
+
+	mn := entity.MainCategory{ID: 12345678, Name: "32432d2d23d23"}
 	DB.Create(&mn)
 	DB.Delete(&mn)
 
 	DB.Exec("DELETE FROM sqlite_sequence WHERE name='sub_categories'")
-    DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('sub_categories', 12345678)")
+	DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('sub_categories', 12345678)")
 
-    DB.Exec("DELETE FROM sqlite_sequence WHERE name='users'")
-    DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('users', 12345678)")
-
-
-
-
-
+	DB.Exec("DELETE FROM sqlite_sequence WHERE name='users'")
+	DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('users', 12345678)")
 
 	return DB
 }

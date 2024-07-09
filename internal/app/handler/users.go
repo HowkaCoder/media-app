@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
@@ -12,8 +11,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type data struct {
@@ -65,21 +62,21 @@ func (uh *UsersHandler) GetUserByID(c *fiber.Ctx) error {
 }
 
 func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
-	id , err := strconv.Atoi(c.Params("id"))
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status":fiber.StatusBadRequest , "data":err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status": fiber.StatusBadRequest, "data": err.Error()})
 	}
 
 	var user entity.User
 	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status":fiber.StatusBadRequest , "data":err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status": fiber.StatusBadRequest, "data": err.Error()})
 	}
 	fmt.Println(user)
-	if err := uh.userUsecase.UpdateUser(&user , uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status":fiber.StatusInternalServerError , "data":err.Error()})
+	if err := uh.userUsecase.UpdateUser(&user, uint(id)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": fiber.StatusInternalServerError, "data": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{"message":"successfully updated"})
+	return c.JSON(fiber.Map{"message": "successfully updated"})
 }
 
 func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {

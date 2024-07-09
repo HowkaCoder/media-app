@@ -57,7 +57,7 @@ func main() {
 	// Order
 	orderRepository := repository.NewOrderRepository(db)
 	orderUsecase := usecase.NewOrderUseCase(orderRepository)
-	orderHandler := handler.NewOrderHandler(orderUsecase, userUsecase)
+	orderHandler := handler.NewOrderHandler(orderUsecase)
 	app := fiber.New(fiber.Config{
 		BodyLimit: 100 * 1024 * 1024,
 	})
@@ -125,7 +125,7 @@ func main() {
 	app.Get("/api/characteristics/:characteristic_id/translations", translationHandler.GetCharacteristicTranslationsByCharacteristicID)
 
 	app.Get("/api/orders", orderHandler.GetAllOrders)
-	app.Get("/api/orders/:id", orderHandler.GetOrderById)
+	app.Get("/api/orders/:id", orderHandler.GetOrderByID)
 	app.Post("/api/orders", orderHandler.CreateOrder)
 	app.Patch("/api/orders/:id", orderHandler.UpdateOrder)
 	app.Delete("/api/orders/:id", orderHandler.DeleteOrder)

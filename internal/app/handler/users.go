@@ -181,7 +181,7 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 			status:  http.StatusBadRequest,
 			message: err.Error(),
 		}
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"data": eri})
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"data 2": eri})
 	}
 	accessToken, err := uh.userService.GenerateAccessToken(user)
 	if err != nil {
@@ -193,14 +193,11 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 		return err
 	}
 
-	var data = data{
-		access_token:  accessToken,
-		refresh_token: refreshToken,
-		status:        user.Role,
-		username:      user.Username,
-	}
 	return c.JSON(fiber.Map{
-		"data": data,
+		"data": data{
+			access_token:  accessToken,
+			refresh_token: refreshToken,
+		},
 	})
 }
 

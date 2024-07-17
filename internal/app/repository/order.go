@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"media-app/internal/app/entity"
 )
@@ -42,7 +43,9 @@ func (or *orderRepository) GetOrderByID(id uint) (*entity.Order, error) {
 }
 
 func (or *orderRepository) CreateOrder(order *entity.Order) error {
+	fmt.Println(order)
 	for _ , value := range order.Products {
+		fmt.Println(value)
 		productID := value.ProductID
 		var product entity.Product
 		if err := or.db.First(&product , productID).Error; err != nil {
@@ -52,6 +55,7 @@ func (or *orderRepository) CreateOrder(order *entity.Order) error {
 		value.Title = product.Name
 		value.Price = product.Price
 		value.Discount = product.Discount
+		fmt.Println(value)
 	}	
 	
 	return or.db.Create(&order).Error

@@ -43,22 +43,22 @@ func (or *orderRepository) GetOrderByID(id uint) (*entity.Order, error) {
 }
 
 func (or *orderRepository) CreateOrder(order *entity.Order) error {
-	fmt.Println(order)
-	for _ , value := range order.Products {
-		fmt.Println(value)
-		productID := value.ProductID
-		var product entity.Product
-		if err := or.db.First(&product , productID).Error; err != nil {
-			return err
-		}
-		value.Description = product.Description
-		value.Title = product.Name
-		value.Price = product.Price
-		value.Discount = product.Discount
-		fmt.Println(value)
-	}	
-	
-	return or.db.Create(&order).Error
+    for i, value := range order.Products {
+        productID := value.ProductID
+        var product entity.Product
+        if err := or.db.First(&product, productID).Error; err != nil {
+            return err
+        }
+
+        // Обновляем поля order.Products[i]
+        order.Products[i].Description = product.Description
+        order.Products[i].Title = product.Name
+        order.Products[i].Price = product.Price
+        order.Products[i].Discount = product.Discount
+    }
+
+    // Сохраняем заказ вместе с обновленными продуктами
+    return or.db.Create(&order).Error
 }
 
 func (or *orderRepository) UpdateOrder(order *entity.Order, id uint) error {

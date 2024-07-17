@@ -51,7 +51,7 @@ func (or *orderRepository) CreateOrder(order *entity.Order) error {
         }
 
         // Обновляем поля order.Products[i]
-        order.Products[i].Description = product.Description
+        order.Products[i].Description  = product.Description   
         order.Products[i].Title = product.Name
         order.Products[i].Price = product.Price
         order.Products[i].Discount = product.Discount

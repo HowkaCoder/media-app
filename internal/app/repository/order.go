@@ -55,8 +55,10 @@ func (or *orderRepository) CreateOrder(order *entity.Order) error {
         order.Products[i].Title = product.Name
         order.Products[i].Price = product.Price
         order.Products[i].Discount = product.Discount
+	fmt.Println(order.Products[i])
     }
 
+	fmt.Println(order)
     // Сохраняем заказ вместе с обновленными продуктами
     return or.db.Create(&order).Error
 }

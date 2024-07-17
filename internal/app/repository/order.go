@@ -49,7 +49,7 @@ func (or *orderRepository) CreateOrder(order *entity.Order) error {
 			return err
 		}
 		value.Description = product.Description
-		value.Title = product.Title
+		value.Title = product.Name
 		value.Price = product.Price
 		value.Discount = product.Discount
 	}	

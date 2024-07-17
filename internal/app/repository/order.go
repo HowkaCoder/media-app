@@ -42,7 +42,7 @@ func (or *orderRepository) GetOrderByID(id uint) (*entity.Order, error) {
 }
 
 func (or *orderRepository) CreateOrder(order *entity.Order) error {
-	for idex , value := range order.Products {
+	for _ , value := range order.Products {
 		productID := value.ProductID
 		var product entity.Product
 		if err := or.db.First(&product , productID).Error; err != nil {

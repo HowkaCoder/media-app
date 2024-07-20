@@ -16,7 +16,7 @@ type ProductRepository interface {
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int, language string) ([]entity.Product, error)
-	GetProductsByFilter(param string , minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error)
+	GetProductsByFilter(discount uint, minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
@@ -269,7 +269,7 @@ func (pr *productRepository) GetProductsByCategoryID(id uint, language string) (
 }
 
 
-func (pr *productRepository) GetProductsByFilter(param string , minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error) {
+func (pr *productRepository) GetProductsByFilter(discount uint , minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error) {
 
 	var products []entity.Product
 
@@ -286,23 +286,14 @@ func (pr *productRepository) GetProductsByFilter(param string , minPrice uint , 
 		query = query.Where("price <= ?", maxPrice)
 	}
 
-	// Проверка на наличие значений для сортировки
-	switch param {
-	case "Price":
-		query = query.Order("price ASC")
-	case "ePrice":
-		query = query.Order("price DESC")
-	case "Name":
-		query = query.Order("name ASC")
-	case "eName":
-		query = query.Order("name DESC")
-	case "Discount":
-		query = query.Order("discount ASC")
-	case "eDiscount":
-		query = query.Order("discount DESC")
-	default:
-		// Если param не соответствует ни одному из известных значений, не сортировать
+	if discount != 0 {
+		query = query.Where("discount = ?" , discount)
 	}
+	
+
+
+	// Проверка на наличие значений для сортировки
+	
 
 	if err := query.Preload("Category").Preload("Images").Preload("Characteristics").Find(&products).Error; err != nil {
 		return nil, err

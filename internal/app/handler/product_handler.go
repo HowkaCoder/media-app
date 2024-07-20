@@ -619,12 +619,12 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 
 func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
-	param := c.Query("param")
+	param , _ := strconv.Atoi( c.Query("discount"))
 	minPrice , _ := strconv.Atoi(c.Query("minPrice"))
 	maxPrice , _ := strconv.Atoi(c.Query("maxPrice"))
 	subcategoryID , _ := strconv.Atoi(c.Query("categoryID"))
 
-	products , err := ph.productUsecase.GetProductByFilter(param , uint(minPrice) , uint(maxPrice) , uint(subcategoryID))
+	products , err := ph.productUsecase.GetProductByFilter(uint(param) , uint(minPrice) , uint(maxPrice) , uint(subcategoryID))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error":err.Error()})
 	}

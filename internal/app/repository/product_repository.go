@@ -277,7 +277,7 @@ func (pr *productRepository) GetProductsByFilter(discount uint , minPrice uint ,
 
 	// Проверка на наличие значений для фильтрации
 	if subcategoryID != 0 {
-		query = query.Where("subcategory_id = ?", subcategoryID)
+		query = query.Where("category_id = ?", subcategoryID)
 	}
 	if minPrice != 0 {
 		query = query.Where("price >= ?", minPrice)

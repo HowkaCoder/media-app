@@ -2,7 +2,7 @@ package repository
 
 import (
 	"errors"
-	"fmt"
+	
 	"gorm.io/gorm"
 	"media-app/internal/app/entity"
 )

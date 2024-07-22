@@ -624,6 +624,8 @@ func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
 	maxPrice , _ := strconv.Atoi(c.Query("maxPrice"))
 	subcategoryID , _ := strconv.Atoi(c.Query("categoryID"))
 
+
+	fmt.Println(subcategoryID)
 	products , err := ph.productUsecase.GetProductByFilter(uint(param) , uint(minPrice) , uint(maxPrice) , uint(subcategoryID))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error":err.Error()})

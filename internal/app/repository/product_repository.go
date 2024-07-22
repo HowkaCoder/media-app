@@ -262,7 +262,7 @@ func (pr *productRepository) DeleteProduct(id uint) error {
 
 func (pr *productRepository) GetProductsByCategoryID(id uint, language string) ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Where("category_id = ? AND language = ?", id, language).Preload("Translations").Preload("Category").Preload("Images").Preload("Characteristics").Find(&products); err != nil {
+	if err := pr.db.Where("sub_category_id = ? AND language = ?", id, language).Preload("Translations").Preload("Category").Preload("Images").Preload("Characteristics").Find(&products); err != nil {
 
 	}
 	return products, nil
@@ -277,7 +277,7 @@ func (pr *productRepository) GetProductsByFilter(discount uint , minPrice uint ,
 
 	// Проверка на наличие значений для фильтрации
 	if subcategoryID != 0 {
-		query = query.Where("SubCategoryID = ?", subcategoryID)
+		query = query.Where("sub_category_id = ?", subcategoryID)
 	}
 	if minPrice != 0 {
 		query = query.Where("price >= ?", minPrice)

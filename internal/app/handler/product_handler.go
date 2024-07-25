@@ -658,7 +658,7 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 
 	limit, _ := strconv.Atoi(c.Query("limit"))
 
-	offset, _ := strconv.Atoi(c.Query("offset"))
+	offseti, _ := strconv.Atoi(c.Query("offset"))
 
 	minPrice, _ := strconv.Atoi(c.Query("min"))
 
@@ -673,7 +673,7 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 
 	if limit > 0 {
 		//return c.JSON(fiber.Map{"limit": limit})
-		products, err = ph.productUsecase.GetProductsWithPagination(int(limit), offset)
+		products, err = ph.productUsecase.GetProductsWithPagination(int(limit), int(offseti))
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}

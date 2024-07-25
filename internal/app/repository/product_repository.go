@@ -15,7 +15,7 @@ type ProductRepository interface {
 	GetProductsByCharacteristics(value, description, language string) ([]entity.Product, error)
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
-	GetProductsWithPagination(limit int, language string) ([]entity.Product, error)
+	GetProductsWithPagination(limit int,  offset int) ([]entity.Product, error)
 	GetProductsByFilter(discount uint, minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
@@ -242,9 +242,9 @@ func (pr *productRepository) GetProductByID(id uint, language string) (*entity.P
 
 }
 
-func (pr *productRepository) GetProductsWithPagination(limit int, language string) ([]entity.Product, error) {
+func (pr *productRepository) GetProductsWithPagination(limit int , offset int) ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Where("language = ?", language).Preload("Images").Preload("Characteristics").Preload("Category").Preload("Translations").Limit(limit).Find(&products).Error; err != nil {
+	if err := pr.db.Offset(offset).Preload("Images").Preload("Characteristics").Preload("Category").Preload("Translations").Limit(limit).Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil

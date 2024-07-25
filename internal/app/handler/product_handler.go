@@ -673,7 +673,7 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 
 	if limit > 0 {
 		//return c.JSON(fiber.Map{"limit": limit})
-		products, err = ph.productUsecase.GetProductsWithPagination(int(limit), int(offset))
+		products, err = ph.productUsecase.GetProductsWithPagination(int(limit), offset)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}

@@ -658,7 +658,7 @@ func (ph *ProductHandler) GetAllProducts(c *fiber.Ctx) error {
 
 	limit, _ := strconv.Atoi(c.Query("limit"))
 
-	limit, _ := strconv.Atoi(c.Query("offset"))
+	offset, _ := strconv.Atoi(c.Query("offset"))
 
 	minPrice, _ := strconv.Atoi(c.Query("min"))
 

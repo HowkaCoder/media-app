@@ -126,8 +126,8 @@ func (pu *productUseCase) GetProductByID(id uint, language string) (*entity.Prod
 	return pu.productRepo.GetProductByID(id, language)
 }
 
-func (pu *productUseCase) GetProductsWithPagination(limit int, language string) ([]entity.Product, error) {
-	return pu.productRepo.GetProductsWithPagination(limit, language)
+func (pu *productUseCase) GetProductsWithPagination(limit int, offset int) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsWithPagination(limit, offset)
 }
 
 func (pu *productUseCase) DeleteProduct(id uint) error {

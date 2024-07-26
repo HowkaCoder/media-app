@@ -635,6 +635,8 @@ func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
   if err := c.BodyParser(&request); err != nil {
     return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error":err.Error()})
   }
+  fmt.Println(request)
+  fmt.Println(&request)
 
 	fmt.Println(request.subcategoryID)
 	products , err := ph.productUsecase.GetProductByFilter(request.discount , uint(request.minPrice) , uint(request.maxPrice) , request.subcategoryID)

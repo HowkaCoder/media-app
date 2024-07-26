@@ -625,11 +625,16 @@ func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
 	//subcategoryID , _ := strconv.Atoi(c.Query("categoryID"))
 
 
-  var request struct {
+ /* var request struct {
     discount        []int    `json:"discount"`
     minPrice        int       `json:"minPrice"`
     maxPrice        int       `json:"maxPrice"`
     subcategoryID   []int     `json:"categoryID"`
+  }
+*/
+
+  var request struct {
+    Apple     string      `json:"apple"`
   }
 
   if err := c.BodyParser(&request); err != nil {
@@ -638,13 +643,14 @@ func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
   fmt.Println(request)
   fmt.Println(&request)
 
+  /*
 	fmt.Println(request.subcategoryID)
 	products , err := ph.productUsecase.GetProductByFilter(request.discount , int(request.minPrice) , int(request.maxPrice) , request.subcategoryID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error":err.Error()})
 	}
-
-	return c.JSON(products)
+*/
+	return c.JSON(request)
 }
 
 

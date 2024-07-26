@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+  "strconv"
 	"gorm.io/gorm"
 	"media-app/internal/app/entity"
 )
@@ -16,7 +17,7 @@ type ProductRepository interface {
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int,  offset int) ([]entity.Product, error)
-	GetProductsByFilter(discount []int, minPrice int , maxPrice int , subcategoryID []int) ([]entity.Product , error)
+	GetProductsByFilter(discount []string, minPrice string , maxPrice string , subcategoryID []string) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
@@ -269,7 +270,7 @@ func (pr *productRepository) GetProductsByCategoryID(id uint, language string) (
 }
 
 
-func (pr *productRepository) GetProductsByFilter(discount []int , minPrice int , maxPrice int , subcategoryID []int) ([]entity.Product , error) {
+func (pr *productRepository) GetProductsByFilter(discount []string , minPrice string , maxPrice string , subcategoryID []string) ([]entity.Product , error) {
 
 	var products []entity.Product
 
@@ -278,19 +279,23 @@ func (pr *productRepository) GetProductsByFilter(discount []int , minPrice int ,
 	// Проверка на наличие значений для фильтрации
 	if len(subcategoryID) != 0 {
     for _ , value := range subcategoryID {
-		  query = query.Where("sub_category_id = ?", uint(value))
+      id , _ := strconv.Atoi(value)
+		  query = query.Where("sub_category_id = ?", uint(id))
     }  
   }
-	if minPrice != 0 {
-		query = query.Where("price >= ?", uint(minPrice))
+	if minPrice != "" {
+    id , _ := strconv.Atoi(minPrice)
+		query = query.Where("price >= ?", uint(id))
 	}
-	if maxPrice != 0 {
-		query = query.Where("price <= ?", uint(maxPrice))
+	if maxPrice != "" {
+    id , _ := strconv.Atoi(maxPrice)
+		query = query.Where("price <= ?", uint(id))
 	}
 
 	if len(discount) != 0 {
     for _ , value := range discount {
-		  query = query.Where("discount = ?" , uint(value))
+      id , _ := strconv.Atoi(value)
+		  query = query.Where("discount = ?" , uint(id))
 	  }
   }
 	

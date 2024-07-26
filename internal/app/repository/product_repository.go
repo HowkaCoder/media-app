@@ -2,9 +2,11 @@ package repository
 
 import (
 	"errors"
-  "strconv"
-	"gorm.io/gorm"
 	"media-app/internal/app/entity"
+	"strconv"
+	"sync"
+
+	"gorm.io/gorm"
 )
 
 type ProductRepository interface {
@@ -17,7 +19,7 @@ type ProductRepository interface {
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int,  offset int) ([]entity.Product, error)
-	GetProductsByFilter(discount []string, minPrice string , maxPrice string , subcategoryID []string) ([]entity.Product , error)
+	GetProductsByFilter(discount []string, minPrice string , maxPrice string , subcategoryID []string , brand string) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
@@ -268,7 +270,7 @@ func (pr *productRepository) GetProductsByCategoryID(id uint, language string) (
 	}
 	return products, nil
 }
-
+/*
 
 func (pr *productRepository) GetProductsByFilter(discount []string , minPrice string , maxPrice string , subcategoryID []string) ([]entity.Product , error) {
 
@@ -310,6 +312,147 @@ func (pr *productRepository) GetProductsByFilter(discount []string , minPrice st
 
 	return products, nil
 }
+
+*/
+
+
+
+
+
+
+
+func (pr *productRepository) GetProductsByFilter(discount []string, minPrice string, maxPrice string, subcategoryID []string , brand string) ([]entity.Product, error) {
+	var products []entity.Product
+	query := pr.db.Model(&entity.Product{})
+
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	errors := make(chan error, 1)
+
+	// Обработка фильтрации по subcategoryID
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if len(subcategoryID) != 0 {
+			mu.Lock()         // Блокируем мьютекс перед изменением запроса
+			defer mu.Unlock() // Разблокируем мьютекс после завершения функции
+			for _, value := range subcategoryID {
+				id, err := strconv.Atoi(value)
+				if err != nil {
+					errors <- err
+					return
+				}
+				query = query.Where("sub_category_id = ?", uint(id))
+			}
+		}
+	}()
+
+	// Обработка фильтрации по minPrice
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if minPrice != "" {
+			id, err := strconv.Atoi(minPrice)
+			if err != nil {
+				errors <- err
+				return
+			}
+			mu.Lock()
+			query = query.Where("price >= ?", uint(id))
+			mu.Unlock()
+		}
+	}()
+
+
+
+
+	// Обработка по brand
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if brand != "" {
+			mu.Lock()
+			query = query.Where("brand = ?" , brand)
+			mu.Unlock()
+		}
+		
+	}()
+
+
+
+
+
+	// Обработка фильтрации по maxPrice
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if maxPrice != "" {
+			id, err := strconv.Atoi(maxPrice)
+			if err != nil {
+				errors <- err
+				return
+			}
+			mu.Lock()
+			query = query.Where("price <= ?", uint(id))
+			mu.Unlock()
+		}
+	}()
+
+	// Обработка фильтрации по discount
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if len(discount) != 0 {
+			mu.Lock()
+			defer mu.Unlock()
+			for _, value := range discount {
+				id, err := strconv.Atoi(value)
+				if err != nil {
+					errors <- err
+					return
+				}
+				query = query.Where("discount = ?", uint(id))
+			}
+		}
+	}()
+
+	// Ожидаем завершения всех горутин
+	wg.Wait()
+	close(errors)
+
+	if err := <-errors; err != nil {
+		return nil, err
+	}
+
+	// Выполняем запрос с предзагрузками
+	if err := query.Preload("Category").Preload("Images").Preload("Characteristics").Find(&products).Error; err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 func (pr *productRepository) GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error) {

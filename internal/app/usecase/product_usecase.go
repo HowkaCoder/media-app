@@ -14,7 +14,7 @@ type ProductUseCase interface {
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int, offset int) ([]entity.Product, error)
-	GetProductByFilter(discount []string , minPrice string , maxPrice string , subcategoryID []string) ([]entity.Product , error)
+	GetProductByFilter(discount []string , minPrice string , maxPrice string , subcategoryID []string , brand string) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
@@ -86,8 +86,8 @@ func (pu *productUseCase) DeleteCharacteristic(id uint) error {
 
 // PRODUCT FUNCTIONS
 
-func (pu *productUseCase) GetProductByFilter(discount []string ,  minPrice string , maxPrice string , subcategoryID []string ) ([]entity.Product , error) { 
-	return pu.productRepo.GetProductsByFilter(discount, minPrice , maxPrice , subcategoryID)
+func (pu *productUseCase) GetProductByFilter(discount []string ,  minPrice string , maxPrice string , subcategoryID []string , brand string ) ([]entity.Product , error) { 
+	return pu.productRepo.GetProductsByFilter(discount, minPrice , maxPrice , subcategoryID , brand)
 }
 
 

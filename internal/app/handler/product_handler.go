@@ -626,10 +626,10 @@ func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
 
 
   var request struct {
-    discount        []uint    `json:"discount"`
-    minPrice        uint       `json:"minPrice"`
-    maxPrice        uint       `json:"maxPrice"`
-    subcategoryID   []uint     `json:"categoryID"`
+    discount        []int    `json:"discount"`
+    minPrice        int       `json:"minPrice"`
+    maxPrice        int       `json:"maxPrice"`
+    subcategoryID   []int     `json:"categoryID"`
   }
 
   if err := c.BodyParser(&request); err != nil {

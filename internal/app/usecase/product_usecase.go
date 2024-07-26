@@ -13,7 +13,7 @@ type ProductUseCase interface {
 	GetProductsByCharacteristics(value, description, language string) ([]entity.Product, error)
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
-	GetProductsWithPagination(limit int, language string) ([]entity.Product, error)
+	GetProductsWithPagination(limit int, offset int) ([]entity.Product, error)
 	GetProductByFilter(discount []uint , minPrice uint , maxPrice uint , subcategoryID []uint) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error

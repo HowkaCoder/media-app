@@ -277,7 +277,7 @@ func (pr *productRepository) GetProductsByFilter(discount []uint , minPrice uint
 
 	// Проверка на наличие значений для фильтрации
 	if len(subcategoryID) != 0 {
-    for index , value := range subcategoryID {
+    for _ , value := range subcategoryID {
 		  query = query.Where("sub_category_id = ?", value)
     }  
   }
@@ -289,7 +289,7 @@ func (pr *productRepository) GetProductsByFilter(discount []uint , minPrice uint
 	}
 
 	if len(discount) != 0 {
-    for index , value := range discount {
+    for _ , value := range discount {
 		  query = query.Where("discount = ?" , value)
 	  }
   }

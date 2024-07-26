@@ -619,14 +619,25 @@ func (ph *ProductHandler) UpdateProduct(c *fiber.Ctx) error {
 
 
 func (ph *ProductHandler) GetProductsByFilter(c *fiber.Ctx) error {
-	param , _ := strconv.Atoi( c.Query("discount"))
-	minPrice , _ := strconv.Atoi(c.Query("minPrice"))
-	maxPrice , _ := strconv.Atoi(c.Query("maxPrice"))
-	subcategoryID , _ := strconv.Atoi(c.Query("categoryID"))
+//	param , _ := strconv.Atoi( c.Query("discount"))
+	//minPrice , _ := strconv.Atoi(c.Query("minPrice"))
+//	maxPrice , _ := strconv.Atoi(c.Query("maxPrice"))
+	//subcategoryID , _ := strconv.Atoi(c.Query("categoryID"))
 
+
+  var request struct {
+    discount        []uint    `json:"discount"`
+    minPrice        uint       `json:"minPrice"`
+    maxPrice        uint       `json:"maxPrice"`
+    subcategoryID   []uint     `json:"categoryID"`
+  }
+
+  if err := c.BodyParser(&request); err != nil {
+    return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error":err.Error()})
+  }
 
 	fmt.Println(subcategoryID)
-	products , err := ph.productUsecase.GetProductByFilter(uint(param) , uint(minPrice) , uint(maxPrice) , uint(subcategoryID))
+	products , err := ph.productUsecase.GetProductByFilter(discount , uint(minPrice) , uint(maxPrice) , subcategoryID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error":err.Error()})
 	}

@@ -104,7 +104,7 @@ func main() {
 	app.Get("/api/:lang/products", productHandler.GetAllProducts)
 	app.Get("/api/:lang/products/:id", productHandler.GetProductByID)
 	app.Get("/api/:lang/categories/:id/products", productHandler.GetProductsByCategory)
-	app.Get("/api/:lang/products-filter", productHandler.GetProductsByFilter)
+	app.Post("/api/:lang/products-filter", productHandler.GetProductsByFilter)
 
 	app.Get("/api/subcategories", subcategoryHandler.GetAllSubCategories)
 	app.Get("/api/subcategories/:id", subcategoryHandler.GetSubCategoryByID)

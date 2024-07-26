@@ -16,7 +16,7 @@ type ProductRepository interface {
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int,  offset int) ([]entity.Product, error)
-	GetProductsByFilter(discount uint, minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error)
+	GetProductsByFilter(discount []uint, minPrice uint , maxPrice uint , []subcategoryID uint) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
@@ -269,16 +269,18 @@ func (pr *productRepository) GetProductsByCategoryID(id uint, language string) (
 }
 
 
-func (pr *productRepository) GetProductsByFilter(discount uint , minPrice uint , maxPrice uint , subcategoryID uint) ([]entity.Product , error) {
+func (pr *productRepository) GetProductsByFilter(discount []uint , minPrice uint , maxPrice uint , subcategoryID []uint) ([]entity.Product , error) {
 
 	var products []entity.Product
 
 	query := pr.db.Model(&entity.Product{})
 
 	// Проверка на наличие значений для фильтрации
-	if subcategoryID != 0 {
-		query = query.Where("sub_category_id = ?", subcategoryID)
-	}
+	if len(subcategoryID) != 0 {
+    for index , value := range subcategoryID {
+		  query = query.Where("sub_category_id = ?", value)
+    }  
+  }
 	if minPrice != 0 {
 		query = query.Where("price >= ?", minPrice)
 	}
@@ -286,9 +288,11 @@ func (pr *productRepository) GetProductsByFilter(discount uint , minPrice uint ,
 		query = query.Where("price <= ?", maxPrice)
 	}
 
-	if discount != 0 {
-		query = query.Where("discount = ?" , discount)
-	}
+	if len(discount) != 0 {
+    for index , value := range discount {
+		  query = query.Where("discount = ?" , value)
+	  }
+  }
 	
 
 

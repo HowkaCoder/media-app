@@ -16,7 +16,7 @@ type ProductRepository interface {
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int,  offset int) ([]entity.Product, error)
-	GetProductsByFilter(discount []uint, minPrice uint , maxPrice uint , []subcategoryID uint) ([]entity.Product , error)
+	GetProductsByFilter(discount []uint, minPrice uint , maxPrice uint , subcategoryID []uint) ([]entity.Product , error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error

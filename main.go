@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"log"
 	"media-app/internal"
+  "media-app/internal/app/entity"
 	"media-app/internal/app/handler"
 	"media-app/internal/app/repository"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
 	"os"
 	"path/filepath"
+  "gorm.io/gorm"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -83,6 +85,12 @@ func main() {
 	// Статический обработчик для папки с изображениями
 	app.Static("/images", imagesDir)
 
+
+
+
+  app.Get("/metrics", GetMetricsHandler(db))
+
+
 	app.Post("/register", userHandler.Register)
 	app.Post("/login", userHandler.Login)
 	app.Get("/boom", func(c *fiber.Ctx) error {
@@ -154,6 +162,29 @@ func main() {
 	api.Patch("/users/:id", userHandler.UpdateUser)
 	api.Delete("/users/:id", userHandler.AuthorizeRole("admin"), userHandler.DeleteUser)
 
+
+
+
+
+
+go func() {
+		for {
+			err := CalculateMetrics(db)
+			if err != nil {
+				log.Println("Error calculating metrics:", err)
+			}
+			time.Sleep(24 * time.Hour) // Выполнение каждые 24 часа
+		}
+	}()
+
+
+
+
+
+
+
+
+
 	log.Println("Server is runnig on " + getPort())
 	log.Fatal(app.Listen(getPort()))
 
@@ -167,4 +198,67 @@ func getPort() string {
 	}
 
 	return port
+}
+
+
+
+
+
+func CalculateMetrics(db *gorm.DB) error {
+	// Пример вычисления общего количества заказов за день
+	var orderCount int64
+	err := db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(0, 0, -1)).Count(&orderCount).Error
+	if err != nil {
+		return err
+	}
+
+	// Сохранение метрики
+	metric := entity.Metric{
+		MetricType:  "order_count",
+		Value:       float64(orderCount),
+		Date:        time.Now(),
+		Description: "Количество заказов за день",
+	}
+	err = db.Create(&metric).Error
+	if err != nil {
+		return err
+	}
+
+	// Пример вычисления общей выручки за день
+	var totalRevenue float64
+	err = db.Model(&entity.Order{}).Select("SUM(total_amount)").Where("created_at >= ?", time.Now().AddDate(0, 0, -1)).Scan(&totalRevenue).Error
+	if err != nil {
+		return err
+	}
+
+	// Сохранение метрики
+	metric = entity.Metric{
+		MetricType:  "total_revenue",
+		Value:       totalRevenue,
+		Date:        time.Now(),
+		Description: "Общая выручка за день",
+	}
+	err = db.Create(&metric).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+
+
+
+
+func GetMetricsHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var metrics []entity.Metric
+		if err := db.Find(&metrics).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+		return c.JSON(metrics)
+	}
 }

@@ -53,7 +53,7 @@ func Init() *gorm.DB {
 		log.Fatal(err)
 	}
 
-	err = DB.AutoMigrate(&entity.User{})
+	err = DB.AutoMigrate(&entity.User{} , &entity.Metric{})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -30,3 +30,12 @@ type OrderProduct struct {
 	Discount    uint   `gorm:"null" json:"discount"`
 	Image       Image  `gorm:"foreignKey:ProductID;references:ProductID" json:"image"`
 }
+
+type Metric struct {
+	gorm.Model
+	ID          uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	MetricType  string    `gorm:"not null" json:"metric_type"` // e.g., "order_count", "total_revenue"
+	Value       float64   `gorm:"not null" json:"value"`
+	Date        time.Time `gorm:"not null" json:"date"`
+	Description string    `gorm:"not null" json:"description"`
+}

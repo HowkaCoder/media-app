@@ -50,11 +50,23 @@ func (or *orderRepository) CreateOrder(order *entity.Order) error {
             return err
         }
 
+
+
+        if product.Quantity != 0 {
+          product.Quantity = product.Quantity - 1
+        }
+
         // Обновляем поля order.Products[i]
         order.Products[i].Description  = product.Description   
         order.Products[i].Title = product.Name
         order.Products[i].Price = product.Price
         order.Products[i].Discount = product.Discount
+        
+        if err := or.db.Save(&product).Error; err != nil {
+          return err
+        }
+
+
 	fmt.Println(order.Products[i])
     }
 

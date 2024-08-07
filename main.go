@@ -243,6 +243,163 @@ func CalculateMetrics(db *gorm.DB) error {
 		return err
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// Подсчет количества заказов за неделю
+var weeklyOrderCount int64
+err := db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(0, 0, -7)).Count(&weeklyOrderCount).Error
+if err != nil {
+    return err
+}
+
+// Сохранение метрики количества заказов за неделю
+weeklyMetric := entity.Metric{
+    MetricType:  "weekly_order_count",
+    Value:       float64(weeklyOrderCount),
+    Date:        time.Now(),
+    Description: "Количество заказов за неделю",
+}
+err = db.Create(&weeklyMetric).Error
+if err != nil {
+    return err
+}
+
+// Подсчет общей выручки за неделю
+var weeklyTotalRevenue float64
+err = db.Model(&entity.Order{}).Select("SUM(total_amount)").Where("created_at >= ?", time.Now().AddDate(0, 0, -7)).Scan(&weeklyTotalRevenue).Error
+if err != nil {
+    return err
+}
+
+// Сохранение метрики общей выручки за неделю
+weeklyMetric = entity.Metric{
+    MetricType:  "weekly_total_revenue",
+    Value:       weeklyTotalRevenue,
+    Date:        time.Now(),
+    Description: "Общая выручка за неделю",
+}
+err = db.Create(&weeklyMetric).Error
+if err != nil {
+    return err
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// Подсчет количества заказов за месяц
+var monthlyOrderCount int64
+err = db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(0, -1, 0)).Count(&monthlyOrderCount).Error
+if err != nil {
+    return err
+}
+
+// Сохранение метрики количества заказов за месяц
+monthlyMetric := entity.Metric{
+    MetricType:  "monthly_order_count",
+    Value:       float64(monthlyOrderCount),
+    Date:        time.Now(),
+    Description: "Количество заказов за месяц",
+}
+err = db.Create(&monthlyMetric).Error
+if err != nil {
+    return err
+}
+
+// Подсчет общей выручки за месяц
+var monthlyTotalRevenue float64
+err = db.Model(&entity.Order{}).Select("SUM(total_amount)").Where("created_at >= ?", time.Now().AddDate(0, -1, 0)).Scan(&monthlyTotalRevenue).Error
+if err != nil {
+    return err
+}
+
+// Сохранение метрики общей выручки за месяц
+monthlyMetric = entity.Metric{
+    MetricType:  "monthly_total_revenue",
+    Value:       monthlyTotalRevenue,
+    Date:        time.Now(),
+    Description: "Общая выручка за месяц",
+}
+err = db.Create(&monthlyMetric).Error
+if err != nil {
+    return err
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// Подсчет количества заказов за год
+var yearlyOrderCount int64
+err = db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(-1, 0, 0)).Count(&yearlyOrderCount).Error
+if err != nil {
+    return err
+}
+
+// Сохранение метрики количества заказов за год
+yearlyMetric := entity.Metric{
+    MetricType:  "yearly_order_count",
+    Value:       float64(yearlyOrderCount),
+    Date:        time.Now(),
+    Description: "Количество заказов за год",
+}
+err = db.Create(&yearlyMetric).Error
+if err != nil {
+    return err
+}
+
+// Подсчет общей выручки за год
+var yearlyTotalRevenue float64
+err = db.Model(&entity.Order{}).Select("SUM(total_amount)").Where("created_at >= ?", time.Now().AddDate(-1, 0, 0)).Scan(&yearlyTotalRevenue).Error
+if err != nil {
+    return err
+}
+
+// Сохранение метрики общей выручки за год
+yearlyMetric = entity.Metric{
+    MetricType:  "yearly_total_revenue",
+    Value:       yearlyTotalRevenue,
+    Date:        time.Now(),
+    Description: "Общая выручка за год",
+}
+err = db.Create(&yearlyMetric).Error
+if err != nil {
+    return err
+}
+
 	return nil
 }
 

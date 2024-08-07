@@ -259,7 +259,7 @@ func CalculateMetrics(db *gorm.DB) error {
 
 	// Подсчет количества заказов за неделю
 var weeklyOrderCount int64
-err := db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(0, 0, -7)).Count(&weeklyOrderCount).Error
+err = db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(0, 0, -7)).Count(&weeklyOrderCount).Error
 if err != nil {
     return err
 }

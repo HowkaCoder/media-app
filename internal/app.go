@@ -11,7 +11,7 @@ var DB *gorm.DB
 
 func Init() *gorm.DB {
 	var err error
-dsn := "root:pBaYLMKHIVQFHPBbbRKAfphLmzReYKSu@tcp(roundhouse.proxy.rlwy.net:39674)/railway?charset=utf8mb4&parseTime=True&loc=Local"
+dsn := "root:AvmOCFLHdwIkOcWYyXzGhuDvuTToYjsM@tcp(viaduct.proxy.rlwy.net:38909)/railway?charset=utf8mb4&parseTime=True&loc=Local"
 DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 //	DB, err := gorm.Open(sqlite.Open("database/database.db"), &gorm.Config{})

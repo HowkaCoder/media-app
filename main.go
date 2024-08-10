@@ -202,211 +202,71 @@ func getPort() string {
 
 
 
+package main
 
+import (
+	"time"
+	"gorm.io/gorm"
+	"fmt"
+	"your_project_path/entity" // Replace with your actual import path
+)
 
 func CalculateMetrics(db *gorm.DB) error {
-	// Пример вычисления общего количества заказов за день
-	var orderCount int64
-	err := db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(0, 0, -1)).Count(&orderCount).Error
-	if err != nil {
-		return err
+	// Calculate and save metrics for different periods
+	if err := calculateAndSaveMetrics(db, "order_count", "Количество заказов", "Count", "id"); err != nil {
+		return fmt.Errorf("error calculating order count metrics: %w", err)
 	}
 
-	// Сохранение метрики
-	metric := entity.Metric{
-		MetricType:  "order_count",
-		Value:       float64(orderCount),
-		Date:        time.Now(),
-		Description: "Количество заказов за день",
+	if err := calculateAndSaveMetrics(db, "total_revenue", "Общая выручка", "SUM", "total_amount"); err != nil {
+		return fmt.Errorf("error calculating total revenue metrics: %w", err)
 	}
-	err = db.Create(&metric).Error
-	if err != nil {
-		return err
-	}
-
-	// Пример вычисления общей выручки за день
-	var totalRevenue float64
-	err = db.Model(&entity.Order{}).Select("SUM(total_amount)").Where("created_at >= ?", time.Now().AddDate(0, 0, -1)).Scan(&totalRevenue).Error
-	if err != nil {
-		return err
-	}
-
-	// Сохранение метрики
-	metric = entity.Metric{
-		MetricType:  "total_revenue",
-		Value:       totalRevenue,
-		Date:        time.Now(),
-		Description: "Общая выручка за день",
-	}
-	err = db.Create(&metric).Error
-	if err != nil {
-		return err
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// Подсчет количества заказов за неделю
-var weeklyOrderCount int64
-err = db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(0, 0, -7)).Count(&weeklyOrderCount).Error
-if err != nil {
-    return err
-}
-
-// Сохранение метрики количества заказов за неделю
-weeklyMetric := entity.Metric{
-    MetricType:  "weekly_order_count",
-    Value:       float64(weeklyOrderCount),
-    Date:        time.Now(),
-    Description: "Количество заказов за неделю",
-}
-err = db.Create(&weeklyMetric).Error
-if err != nil {
-    return err
-}
-
-// Подсчет общей выручки за неделю
-var weeklyTotalRevenue float64
-err = db.Model(&entity.Order{}).Select("SUM(total_amount)").Where("created_at >= ?", time.Now().AddDate(0, 0, -7)).Scan(&weeklyTotalRevenue).Error
-if err != nil {
-    return err
-}
-
-// Сохранение метрики общей выручки за неделю
-weeklyMetric = entity.Metric{
-    MetricType:  "weekly_total_revenue",
-    Value:       weeklyTotalRevenue,
-    Date:        time.Now(),
-    Description: "Общая выручка за неделю",
-}
-err = db.Create(&weeklyMetric).Error
-if err != nil {
-    return err
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// Подсчет количества заказов за месяц
-var monthlyOrderCount int64
-err = db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(0, -1, 0)).Count(&monthlyOrderCount).Error
-if err != nil {
-    return err
-}
-
-// Сохранение метрики количества заказов за месяц
-monthlyMetric := entity.Metric{
-    MetricType:  "monthly_order_count",
-    Value:       float64(monthlyOrderCount),
-    Date:        time.Now(),
-    Description: "Количество заказов за месяц",
-}
-err = db.Create(&monthlyMetric).Error
-if err != nil {
-    return err
-}
-
-// Подсчет общей выручки за месяц
-var monthlyTotalRevenue float64
-err = db.Model(&entity.Order{}).Select("SUM(total_amount)").Where("created_at >= ?", time.Now().AddDate(0, -1, 0)).Scan(&monthlyTotalRevenue).Error
-if err != nil {
-    return err
-}
-
-// Сохранение метрики общей выручки за месяц
-monthlyMetric = entity.Metric{
-    MetricType:  "monthly_total_revenue",
-    Value:       monthlyTotalRevenue,
-    Date:        time.Now(),
-    Description: "Общая выручка за месяц",
-}
-err = db.Create(&monthlyMetric).Error
-if err != nil {
-    return err
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// Подсчет количества заказов за год
-var yearlyOrderCount int64
-err = db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().AddDate(-1, 0, 0)).Count(&yearlyOrderCount).Error
-if err != nil {
-    return err
-}
-
-// Сохранение метрики количества заказов за год
-yearlyMetric := entity.Metric{
-    MetricType:  "yearly_order_count",
-    Value:       float64(yearlyOrderCount),
-    Date:        time.Now(),
-    Description: "Количество заказов за год",
-}
-err = db.Create(&yearlyMetric).Error
-if err != nil {
-    return err
-}
-
-// Подсчет общей выручки за год
-var yearlyTotalRevenue float64
-err = db.Model(&entity.Order{}).Select("SUM(total_amount)").Where("created_at >= ?", time.Now().AddDate(-1, 0, 0)).Scan(&yearlyTotalRevenue).Error
-if err != nil {
-    return err
-}
-
-// Сохранение метрики общей выручки за год
-yearlyMetric = entity.Metric{
-    MetricType:  "yearly_total_revenue",
-    Value:       yearlyTotalRevenue,
-    Date:        time.Now(),
-    Description: "Общая выручка за год",
-}
-err = db.Create(&yearlyMetric).Error
-if err != nil {
-    return err
-}
 
 	return nil
 }
 
+func calculateAndSaveMetrics(db *gorm.DB, metricType, description, aggregateFunc, column string) error {
+	// Define periods and their labels
+	periods := []struct {
+		label  string
+		offset time.Duration
+	}{
+		{"daily", -24 * time.Hour},
+		{"weekly", -7 * 24 * time.Hour},
+		{"monthly", -30 * 24 * time.Hour},
+		{"yearly", -365 * 24 * time.Hour},
+	}
 
+	for _, period := range periods {
+		// Prepare the query based on the aggregate function
+		var value float64
+		query := db.Model(&entity.Order{}).Where("created_at >= ?", time.Now().Add(period.offset)).Where("deleted_at IS NULL")
 
+		if aggregateFunc == "Count" {
+			var count int64
+			if err := query.Count(&count).Error; err != nil {
+				return err
+			}
+			value = float64(count)
+		} else if aggregateFunc == "SUM" {
+			if err := query.Select(fmt.Sprintf("COALESCE(SUM(%s), 0)", column)).Scan(&value).Error; err != nil {
+				return err
+			}
+		}
 
+		// Save the metric
+		metric := entity.Metric{
+			MetricType:  fmt.Sprintf("%s_%s", period.label, metricType),
+			Value:       value,
+			Date:        time.Now(),
+			Description: fmt.Sprintf("%s за %s", description, period.label),
+		}
+		if err := db.Create(&metric).Error; err != nil {
+			return err
+		}
+	}
 
+	return nil
+}
 
 func GetMetricsHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -419,3 +279,4 @@ func GetMetricsHandler(db *gorm.DB) fiber.Handler {
 		return c.JSON(metrics)
 	}
 }
+

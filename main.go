@@ -200,17 +200,6 @@ func getPort() string {
 	return port
 }
 
-
-
-package main
-
-import (
-	"time"
-	"gorm.io/gorm"
-	"fmt"
-	"your_project_path/entity" // Replace with your actual import path
-)
-
 func CalculateMetrics(db *gorm.DB) error {
 	// Calculate and save metrics for different periods
 	if err := calculateAndSaveMetrics(db, "order_count", "Количество заказов", "Count", "id"); err != nil {

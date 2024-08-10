@@ -16,7 +16,7 @@ type User struct {
 	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at" json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
-	Username  string         `gorm:"uniqueIndex" json:"username"`
+	Username  string         `gorm:"type:varchar(100);uniqueIndex" json:"username"`
 	Firstname string         `gorm:"not null" json:"firstname"`
 	Lastname  string         `gorm:"not null" json:"lastname"`
 	Age       uint           `gorm:"not null" json:"age"`

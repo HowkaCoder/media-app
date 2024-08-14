@@ -4,6 +4,7 @@ import (
 	"errors"
 	"media-app/internal/app/entity"
 	"strconv"
+  "fmt"
 	"sync"
 
 	"gorm.io/gorm"
@@ -24,7 +25,7 @@ type ProductRepository interface {
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
-	
+  GetProductsByName(name string) ([]entity.Product , error)	
 
 	// IMAGE - CRUD FUNCTIONS
 
@@ -84,6 +85,14 @@ func (pr *productRepository) GetImageByID(id uint) (*entity.Image, error) {
 		}
 	}
 	return image, nil
+}
+
+func (pr *productRepository) GetProductsByName(name string) ([]entity.Product , error) {
+  var products []entity.Product
+  if err := pr.db.Where("name LIKE ?", "%"+name+"%").Find(&products).Error; err != nil {
+    return nil,err
+  }
+  return products,nil
 }
 
 func (pr *productRepository) DeleteImage(id uint) error {
@@ -265,7 +274,8 @@ func (pr *productRepository) DeleteProduct(id uint) error {
 
 func (pr *productRepository) GetProductsByCategoryID(id uint, language string) ([]entity.Product, error) {
 	var products []entity.Product
-	if err := pr.db.Where("sub_category_id = ? AND language = ?", id, language).Preload("Translations").Preload("Category").Preload("Images").Preload("Characteristics").Find(&products); err != nil {
+  fmt.Print(language)
+	if err := pr.db.Where("sub_category_id = ?", id).Preload("Translations").Preload("Category").Preload("Images").Preload("Characteristics").Find(&products); err != nil {
 
 	}
 	return products, nil

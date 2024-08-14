@@ -27,6 +27,17 @@ func NewProductHandler(useCase usecase.ProductUseCase) *ProductHandler {
 	return &ProductHandler{productUsecase: useCase}
 }
 
+
+func (ph *ProductHandler) GetProductsByName(c *fiber.Ctx) error {
+  name := c.Params("name")
+  products , err := ph.productUsecase.GetProductsByName(name)
+  if err != nil {
+    return c.Status(fiber.StatusNoContent).JSON(fiber.Map{"Error":err.Error()})
+  }
+
+  return c.JSON(products)
+}
+
 func (ph *ProductHandler) CreateProduct(c *fiber.Ctx) error {
 
 	c.Set("Access-Control-Allow-Origin", "*")

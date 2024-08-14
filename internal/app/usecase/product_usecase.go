@@ -20,7 +20,10 @@ type ProductUseCase interface {
 	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
 	GetProductsSorterByThreeParams(name , price , discount string ) ([]entity.Product, error)
-	// IMAGE - CRUD FUNCTIONS
+  GetProductsByName(name string) ([]entity.Product , error)
+
+
+  // IMAGE - CRUD FUNCTIONS
 
 	CreateImage(image *entity.Image) error
 	GetImagesByProductID(product_id uint) ([]entity.Image, error)
@@ -144,4 +147,8 @@ func (pu *productUseCase) GetProductsByPriceRange(minPrice, maxPrice uint, langu
 
 func (pu *productUseCase) GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint, language string) ([]entity.Product, error) {
 	return pu.productRepo.GetProductsSortedByPriceAndCategory(sortOrder, categoryID, language)
+}
+
+func (pu *productUseCase) GetProductsByName(name string) ([]entity.Product ,error) {
+  return pu.productRepo.GetProductsByName(name)
 }

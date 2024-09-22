@@ -18,7 +18,7 @@ import (
 
 func main() {
 
-	log.Println("starting server")
+	log.Println("starting servers")
 
 	log.Println("database initiating ")
 	db := internal.Init()

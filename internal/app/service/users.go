@@ -15,6 +15,21 @@ type UserService interface {
 
 type userService struct{}
 
+
+
+
+
+// Структура для получения токена
+type TokenResponse struct {
+	Message   string `json:"message"`
+	Data      struct {
+		Token string `json:"token"`
+	} `json:"data"`
+	TokenType string `json:"token_type"`
+}
+
+
+
 func NewUserService() UserService { return &userService{} }
 
 func (s *userService) GenerateAccessToken(user *entity.User) (string, error) {
@@ -63,3 +78,9 @@ func (s *userService) GenerateRefreshToken(user *entity.User) (string, error) {
 
 	return token.SignedString(entity.SecretKey)
 }
+
+
+
+
+
+

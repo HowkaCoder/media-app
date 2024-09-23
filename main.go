@@ -14,8 +14,39 @@ import (
   "gorm.io/gorm"
   "time"
 	"github.com/gofiber/fiber/v2"
-)
 
+
+
+
+
+
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
+
+	"strings"
+
+	"github.com/go-redis/redis/v8"
+	"golang.org/x/net/context"
+	"crypto/rand"
+)
+const (
+	loginURL    = "https://notify.eskiz.uz/api/auth/login"
+	refreshURL  = "https://notify.eskiz.uz/api/auth/refresh"
+	tokenFile   = "token.txt"
+	email       = "timajkeenks@gmail.com"
+	password    = "IiUx7KGWsjy1L4dScoP7wlOurj9oNobByVdcXx5l"
+	refreshTime = 20 * 24 * time.Hour // 20 дней
+)
+type TokenResponse struct {
+	Message   string `json:"message"`
+	Data      struct {
+		Token string `json:"token"`
+	} `json:"data"`
+	TokenType string `json:"token_type"`
+}
 func main() {
 
 	log.Println("starting servers")
@@ -23,6 +54,17 @@ func main() {
 	log.Println("database initiating ")
 	db := internal.Init()
 	log.Println("database initiation complete")
+
+
+
+
+	log.Println("sms шлюз запускается ")
+	if err := loginAndSaveToken(); err != nil {
+		log.Fatal(err)
+	}
+	startTokenRefresher()
+	log.Println("sms шлюз работает ")
+
 
 	// PRODUCT
 	productRepository := repository.NewProductRepository(db)
@@ -138,6 +180,25 @@ func main() {
 	app.Post("/api/orders", orderHandler.CreateOrder)
 	app.Patch("/api/orders/:id", orderHandler.UpdateOrder)
 	app.Delete("/api/orders/:id", orderHandler.DeleteOrder)
+
+
+	app.Post("/api/users/phone" , func (c *fiber.Ctx) error {
+		var request struct {
+			Phone 		string     `phone`
+		}
+
+		if err := c.BodyParser(&request); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+
+		sendSMS(request.Phone)
+
+
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"message":"sms sended",
+		})
+
+	})
 
 	api := app.Group("/api", userHandler.AuthenticateToken)
 	//api := app.Group("/api")
@@ -270,3 +331,130 @@ func GetMetricsHandler(db *gorm.DB) fiber.Handler {
 	}
 }
 
+
+func loginAndSaveToken() error {
+	resp, err := http.Post(loginURL, "application/x-www-form-urlencoded", bytes.NewBuffer([]byte(fmt.Sprintf("email=%s&password=%s", email, password))))
+	if err != nil {
+		return fmt.Errorf("login failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("reading response failed: %v", err)
+	}
+
+	var tokenResp TokenResponse
+	if err := json.Unmarshal(body, &tokenResp); err != nil {
+		return fmt.Errorf("unmarshal failed: %v", err)
+	}
+
+	token := tokenResp.Data.Token
+	if err := ioutil.WriteFile(tokenFile, []byte(token), 0644); err != nil {
+		return fmt.Errorf("write token failed: %v", err)
+	}
+
+	fmt.Println("Token saved successfully")
+	return nil
+}
+
+func refreshAndSaveToken() error {
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPatch, refreshURL, nil)
+	if err != nil {
+		return fmt.Errorf("refresh token failed: %v", err)
+	}
+
+	token, err := ioutil.ReadFile(tokenFile)
+	if err != nil {
+		return fmt.Errorf("read token failed: %v", err)
+	}
+	req.Header.Add("Authorization", "Bearer "+string(token))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("refresh request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("reading refresh response failed: %v", err)
+	}
+
+	var tokenResp TokenResponse
+	if err := json.Unmarshal(body, &tokenResp); err != nil {
+		return fmt.Errorf("unmarshal failed: %v", err)
+	}
+
+	newToken := tokenResp.Data.Token
+	if err := ioutil.WriteFile(tokenFile, []byte(newToken), 0644); err != nil {
+		return fmt.Errorf("write new token failed: %v", err)
+	}
+
+	fmt.Println("Token refreshed successfully")
+	return nil
+}
+
+func startTokenRefresher() {
+	ticker := time.NewTicker(refreshTime)
+	go func() {
+		for {
+			<-ticker.C
+			if err := refreshAndSaveToken(); err != nil {
+				log.Printf("Error refreshing token: %v", err)
+			}
+		}
+	}()
+}
+
+
+
+
+
+const smsURL = "https://notify.eskiz.uz/api/message/sms/send"
+
+func generateCode() string {
+	code := make([]byte, 3)
+	rand.Read(code)
+	return fmt.Sprintf("%06d", int(code[0])%1000000)
+}
+
+func sendSMS(phone string) error {
+	code := generateCode()
+
+	token, err := ioutil.ReadFile(tokenFile)
+	if err != nil {
+		return fmt.Errorf("read token failed: %v", err)
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", smsURL, strings.NewReader(fmt.Sprintf("mobile_phone=%s&message=%s&from=верефикация кода", phone, code)))
+	if err != nil {
+		return fmt.Errorf("request creation failed: %v", err)
+	}
+	req.Header.Add("Authorization", "Bearer "+string(token))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("sending SMS failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		return fmt.Errorf("failed to send SMS: %s", string(body))
+	}
+
+	// Сохранение кода в Redis
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+	if err := rdb.Set(ctx, phone, code, 0).Err(); err != nil {
+		return fmt.Errorf("failed to save code in Redis: %v", err)
+	}
+
+	fmt.Printf("SMS sent successfully to %s\n", phone)
+	return nil
+}

@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"media-app/internal/app/entity"
+
+	"gorm.io/gorm"
 )
 
 type UserRepository interface {
@@ -68,7 +69,7 @@ func (ur *userRepository) UpdateUser(user *entity.User, id uint) error {
 	if user.Age != 0 {
 		eUser.Age = user.Age
 	}
-	if user.Phone != 0 {
+	if user.Phone != "" {
 		eUser.Phone = user.Phone
 	}
 	if user.Address != "" {

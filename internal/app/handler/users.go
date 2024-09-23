@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
@@ -9,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
 )
@@ -83,63 +86,66 @@ func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
 	}
 	return c.JSON(fiber.Map{"message": "successfully deleted user"})
 }
+func verifyCode(phone, code string) bool {
+	ctx := context.Background()
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
 
+	storedCode, err := rdb.Get(ctx, phone).Result()
+	if err == redis.Nil {
+		fmt.Println("Code not found for this phone number")
+		return false
+	} else if err != nil {
+		log.Fatalf("Failed to get code from Redis: %v", err)
+	}
+
+	return storedCode == code
+}
 func (uh *UsersHandler) Register(c *fiber.Ctx) error {
-	//
-	//file, err := c.FormFile("ava")
-	//
-	//if err != nil {
-	//	log.Println("Error in uploading Image : ", err)
-	//	return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
-	//
-	//}
-	//
-	//uniqueId := uuid.New()
-	//filename := strings.Replace(uniqueId.String(), "-", "", -1)
-	//fileExt := strings.Split(file.Filename, ".")[1]
-	//image := fmt.Sprintf("%s.%s", filename, fileExt)
-	//
-	//// Get absolute path to the images folder
-	//imagesDir, err := os.Getwd()
-	//if err != nil {
-	//	log.Println("Error getting working directory:", err)
-	//	return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
-	//}
-	//imagesDir = fmt.Sprintf("%s/images", imagesDir)
-	//
-	//// Create the images folder if it doesn't exist
-	//if err := os.MkdirAll(imagesDir, os.ModePerm); err != nil {
-	//	log.Println("Error creating images folder:", err)
-	//	return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
-	//}
-	//
-	//// Save the image
-	//err = c.SaveFile(file, fmt.Sprintf("%s/%s", imagesDir, image))
-	//if err != nil {
-	//	log.Println("Error in saving Image :", err, " image ", image)
-	//	return c.JSON(fiber.Map{"status": 500, "message": "Server error", "data": nil})
-	//}
 
 	var user entity.User
-	if err := c.BodyParser(&user); err != nil {
+
+	var request struct {
+		Username  string ` json:"username"`
+		Firstname string ` json:"firstname"`
+		Lastname  string ` json:"lastname"`
+		Age       uint   ` json:"age"`
+		Phone     string ` json:"phone"`
+		Address   string ` json:"address"`
+		Password  string ` json:"password"`
+		Role      string ` json:"role"`
+		Ava       string ` json:"ava"`
+		Code      string `  json:"code"`
+	}
+	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	//hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//user.Password = string(hashedPassword)
+	if verifyCode(request.Phone, request.Code) {
+		user.Username = request.Username
+		user.Firstname = request.Firstname
+		user.Lastname = request.Lastname
+		user.Age = request.Age
+		user.Phone = request.Phone
+		user.Address = request.Address
+		user.Role = request.Role
+		user.Ava = request.Ava
 
-	//user.Ava = fmt.Sprintf("https://media-app-production.up.railway.app/images/%s", image)
+		if err := uh.userUsecase.CreateUser(&user); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+		}
 
-	if err := uh.userUsecase.CreateUser(&user); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+		return c.JSON(fiber.Map{
+			"message": "User registered successfully",
+		})
+	} else {
+		return c.JSON(fiber.Map{
+			"message": "User registered error",
+		})
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "User registered successfully",
-	})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "..."})
+
 }
 
 func (uh *UsersHandler) Login(c *fiber.Ctx) error {

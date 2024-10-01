@@ -105,7 +105,7 @@ func verifyCode(phone, code string) bool {
 func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 
 	var user entity.User
-
+/*
 	var request struct {
 		Username  string ` json:"username"`
 		Firstname string ` json:"firstname"`
@@ -118,9 +118,11 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 		Ava       string ` json:"ava"`
 		Code      string `  json:"code"`
 	}
-	if err := c.BodyParser(&request); err != nil {
+ */
+	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
+	/*
 	if verifyCode(request.Phone, request.Code) {
 		user.Username = request.Username
 		user.Firstname = request.Firstname
@@ -143,7 +145,11 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 			"message": "User registered error",
 		})
 	}
-
+*/
+	
+	if err := uh.userUsecase.CreateUser(&user); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
+		}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "..."})
 
 }

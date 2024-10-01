@@ -150,7 +150,7 @@ func (uh *UsersHandler) Register(c *fiber.Ctx) error {
 	if err := uh.userUsecase.CreateUser(&user); err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
 		}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "..."})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "successfully created user"})
 
 }
 

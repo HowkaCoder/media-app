@@ -1,23 +1,15 @@
-# Use the official Golang image as the base image
-FROM golang:latest
-
-# Set the working directory inside the container
-WORKDIR /app
-RUN apt-get update && \
-    apt-get install -y libwebp-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy all files from the current directory (.) into the working directory (/app) inside the container
+FROM golang:1.22-bookworm AS build
+RUN apt-get update && apt-get install -y --no-install-recommends libwebp-dev && rm -rf /var/lib/apt/lists/*
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
+RUN CGO_ENABLED=1 go build -o /out/media-app .
 
-
-# Build your application (assuming main.go is located inside the cmd directory)
-RUN go build -o main . 
-
-# Expose the port that your application will use
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends libwebp7 ca-certificates && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY --from=build /out/media-app .
+RUN mkdir -p database images
 EXPOSE 8082
-
-# Command to run when the container starts
-CMD ["./main"]
-
+CMD ["./media-app"]

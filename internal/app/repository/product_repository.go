@@ -2,9 +2,9 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"media-app/internal/app/entity"
 	"strconv"
-  "fmt"
 	"sync"
 
 	"gorm.io/gorm"
@@ -13,19 +13,19 @@ import (
 type ProductRepository interface {
 
 	// PRODUCT - CRUD FUNCTIONS
-	GetProductsSortedByThreeParams(name , price , discount string) ([]entity.Product , error)
+	GetProductsSortedByThreeParams(name, price, discount string) ([]entity.Product, error)
 	GetProductsSortedByPriceAndCategory(sortOrder string, categoryID uint, language string) ([]entity.Product, error)
 	GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error)
 	GetProductsByCharacteristics(value, description, language string) ([]entity.Product, error)
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
-	GetProductsWithPagination(limit int,  offset int) ([]entity.Product, error)
-	GetProductsByFilter(discount []string, minPrice string , maxPrice string , subcategoryID []string , brand string) ([]entity.Product , error)
+	GetProductsWithPagination(limit int, offset int) ([]entity.Product, error)
+	GetProductsByFilter(discount []string, minPrice string, maxPrice string, subcategoryID []string, brand string) ([]entity.Product, error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
-  GetProductsByName(name string) ([]entity.Product , error)	
+	GetProductsByName(name string) ([]entity.Product, error)
 
 	// IMAGE - CRUD FUNCTIONS
 
@@ -87,12 +87,12 @@ func (pr *productRepository) GetImageByID(id uint) (*entity.Image, error) {
 	return image, nil
 }
 
-func (pr *productRepository) GetProductsByName(name string) ([]entity.Product , error) {
-  var products []entity.Product
-  if err := pr.db.Where("name LIKE ?", "%"+name+"%").Find(&products).Error; err != nil {
-    return nil,err
-  }
-  return products,nil
+func (pr *productRepository) GetProductsByName(name string) ([]entity.Product, error) {
+	var products []entity.Product
+	if err := pr.db.Where("name LIKE ?", "%"+name+"%").Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
 }
 
 func (pr *productRepository) DeleteImage(id uint) error {
@@ -148,20 +148,19 @@ func (pr *productRepository) UpdateCharacteristic(characteristic entity.Characte
 
 // PRODUCT FUNCTIONS
 
-
-func (pr *productRepository) GetProductsSortedByThreeParams(name , price , discount string) ([]entity.Product , error) {
+func (pr *productRepository) GetProductsSortedByThreeParams(name, price, discount string) ([]entity.Product, error) {
 	var products []entity.Product
 
 	query := pr.db.Model(&entity.Product{})
 
-	if name != ""  {
+	if name != "" {
 		if name == "asc" {
 			query = query.Order("name asc")
 		} else if name == "desc" {
 			query = query.Order("name desc")
 		}
 	}
-		
+
 	if price != "" {
 		if price == "asc" {
 			query = query.Order("price asc")
@@ -179,24 +178,11 @@ func (pr *productRepository) GetProductsSortedByThreeParams(name , price , disco
 	}
 
 	if err := query.Find(&products).Error; err != nil {
-		return nil , err
+		return nil, err
 	}
 
-	return products,nil
+	return products, nil
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 func (pr *productRepository) CreateProduct(product *entity.Product) error {
 	return pr.db.Create(product).Error
@@ -206,7 +192,7 @@ func (pr *productRepository) UpdateProduct(product *entity.Product, id uint) err
 	var eProduct *entity.Product
 	if err := pr.db.First(&eProduct, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return	errors.New("Product not found")
+			return errors.New("Product not found")
 		}
 	}
 
@@ -254,7 +240,7 @@ func (pr *productRepository) GetProductByID(id uint, language string) (*entity.P
 
 }
 
-func (pr *productRepository) GetProductsWithPagination(limit int , offset int) ([]entity.Product, error) {
+func (pr *productRepository) GetProductsWithPagination(limit int, offset int) ([]entity.Product, error) {
 	var products []entity.Product
 	if err := pr.db.Offset(offset).Preload("Images").Preload("Characteristics").Preload("Category").Preload("Translations").Limit(limit).Find(&products).Error; err != nil {
 		return nil, err
@@ -274,12 +260,13 @@ func (pr *productRepository) DeleteProduct(id uint) error {
 
 func (pr *productRepository) GetProductsByCategoryID(id uint, language string) ([]entity.Product, error) {
 	var products []entity.Product
-  fmt.Print(language)
+	fmt.Print(language)
 	if err := pr.db.Where("sub_category_id = ?", id).Preload("Translations").Preload("Category").Preload("Images").Preload("Characteristics").Find(&products); err != nil {
 
 	}
 	return products, nil
 }
+
 /*
 
 func (pr *productRepository) GetProductsByFilter(discount []string , minPrice string , maxPrice string , subcategoryID []string) ([]entity.Product , error) {
@@ -293,7 +280,7 @@ func (pr *productRepository) GetProductsByFilter(discount []string , minPrice st
     for _ , value := range subcategoryID {
       id , _ := strconv.Atoi(value)
 		  query = query.Where("sub_category_id = ?", uint(id))
-    }  
+    }
   }
 	if minPrice != "" {
     id , _ := strconv.Atoi(minPrice)
@@ -310,11 +297,11 @@ func (pr *productRepository) GetProductsByFilter(discount []string , minPrice st
 		  query = query.Where("discount = ?" , uint(id))
 	  }
   }
-	
+
 
 
 	// Проверка на наличие значений для сортировки
-	
+
 
 	if err := query.Preload("Category").Preload("Images").Preload("Characteristics").Find(&products).Error; err != nil {
 		return nil, err
@@ -325,13 +312,7 @@ func (pr *productRepository) GetProductsByFilter(discount []string , minPrice st
 
 */
 
-
-
-
-
-
-
-func (pr *productRepository) GetProductsByFilter(discount []string, minPrice string, maxPrice string, subcategoryID []string , brand string) ([]entity.Product, error) {
+func (pr *productRepository) GetProductsByFilter(discount []string, minPrice string, maxPrice string, subcategoryID []string, brand string) ([]entity.Product, error) {
 	var products []entity.Product
 	query := pr.db.Model(&entity.Product{})
 
@@ -373,9 +354,6 @@ func (pr *productRepository) GetProductsByFilter(discount []string, minPrice str
 		}
 	}()
 
-
-
-
 	// Обработка по brand
 
 	wg.Add(1)
@@ -383,15 +361,11 @@ func (pr *productRepository) GetProductsByFilter(discount []string, minPrice str
 		defer wg.Done()
 		if brand != "" {
 			mu.Lock()
-			query = query.Where("brand = ?" , brand)
+			query = query.Where("brand = ?", brand)
 			mu.Unlock()
 		}
-		
+
 	}()
-
-
-
-
 
 	// Обработка фильтрации по maxPrice
 	wg.Add(1)
@@ -442,28 +416,6 @@ func (pr *productRepository) GetProductsByFilter(discount []string, minPrice str
 
 	return products, nil
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 func (pr *productRepository) GetProductsByPriceRange(minPrice, maxPrice uint, language string) ([]entity.Product, error) {
 	var products []entity.Product

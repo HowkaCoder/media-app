@@ -2,204 +2,240 @@ package handler
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"media-app/internal/app/entity"
 	"media-app/internal/app/service"
 	"media-app/internal/app/usecase"
-	"net/http"
+	"media-app/internal/otp"
+	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt"
+	"gorm.io/gorm"
 )
 
-type errorr struct {
-	status  uint   `json:"status"`
-	message string `json:"message"`
-}
+var phoneRe = regexp.MustCompile(`^\+?998\d{9}$`)
 
 type UsersHandler struct {
 	userUsecase usecase.UsersUseCase
 	userService service.UserService
+	otp         *otp.Store
+	sender      Sender
 }
+
+type Sender interface {
+	Send(ctx context.Context, phone, text string) error
+}
+
 type login struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-func NewUserHandler(useCase usecase.UsersUseCase, userService service.UserService) *UsersHandler {
-	return &UsersHandler{userUsecase: useCase, userService: userService}
+type registerRequest struct {
+	Username  string `json:"username"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Age       uint   `json:"age"`
+	Phone     string `json:"phone"`
+	Address   string `json:"address"`
+	Password  string `json:"password"`
+	Ava       string `json:"ava"`
+	Code      string `json:"code"`
+}
+
+type updateUserRequest struct {
+	Username  string `json:"username"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Age       uint   `json:"age"`
+	Phone     string `json:"phone"`
+	Address   string `json:"address"`
+	Password  string `json:"password"`
+	Role      string `json:"role"`
+	Ava       string `json:"ava"`
+}
+
+func NewUserHandler(useCase usecase.UsersUseCase, userService service.UserService, otpStore *otp.Store, sender Sender) *UsersHandler {
+	return &UsersHandler{userUsecase: useCase, userService: userService, otp: otpStore, sender: sender}
 }
 
 func (uh *UsersHandler) GetAllUsers(c *fiber.Ctx) error {
 	users, err := uh.userUsecase.GetAllUsers()
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	return c.JSON(users)
 }
 
 func (uh *UsersHandler) GetUserByID(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+	}
+	if !canAccessUser(c, uint(id)) {
+		return fiber.ErrForbidden
 	}
 
 	user, err := uh.userUsecase.GetUserByID(uint(id))
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
 	}
-
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
 	return c.JSON(user)
 }
 
 func (uh *UsersHandler) UpdateUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status": fiber.StatusBadRequest, "data": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+	}
+	if !canAccessUser(c, uint(id)) {
+		return fiber.ErrForbidden
 	}
 
-	var user entity.User
-	if err := c.BodyParser(&user); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Status": fiber.StatusBadRequest, "data": err.Error()})
+	var req updateUserRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	fmt.Println(user)
+	if req.Role != "" && c.Locals("role") != "admin" {
+		return fiber.ErrForbidden
+	}
+
+	user := entity.User{
+		Username:  req.Username,
+		Firstname: req.Firstname,
+		Lastname:  req.Lastname,
+		Age:       req.Age,
+		Phone:     req.Phone,
+		Address:   req.Address,
+		Role:      req.Role,
+		Ava:       req.Ava,
+	}
+	if req.Password != "" {
+		hash, err := uh.userService.HashPassword(req.Password)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+		user.Password = hash
+	}
+
 	if err := uh.userUsecase.UpdateUser(&user, uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": fiber.StatusInternalServerError, "data": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	return c.JSON(fiber.Map{"message": "successfully updated"})
 }
 
 func (uh *UsersHandler) DeleteUser(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": err})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
 	}
 
 	if err := uh.userUsecase.DeleteUser(uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(fiber.Map{"message": "successfully deleted user"})
 }
-func verifyCode(phone, code string) bool {
-	ctx := context.Background()
-	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
-	})
 
-	storedCode, err := rdb.Get(ctx, phone).Result()
-	if err == redis.Nil {
-		fmt.Println("Code not found for this phone number")
-		return false
-	} else if err != nil {
-		log.Fatalf("Failed to get code from Redis: %v", err)
+func (uh *UsersHandler) SendCode(c *fiber.Ctx) error {
+	if uh.otp == nil || uh.sender == nil {
+		return c.Status(fiber.StatusServiceUnavailable).JSON(fiber.Map{"error": "sms is disabled"})
 	}
 
-	return storedCode == code
-}
-func (uh *UsersHandler) Register(c *fiber.Ctx) error {
-
-	var user entity.User
-/*
-	var request struct {
-		Username  string ` json:"username"`
-		Firstname string ` json:"firstname"`
-		Lastname  string ` json:"lastname"`
-		Age       uint   ` json:"age"`
-		Phone     string ` json:"phone"`
-		Address   string ` json:"address"`
-		Password  string ` json:"password"`
-		Role      string ` json:"role"`
-		Ava       string ` json:"ava"`
-		Code      string `  json:"code"`
+	var req struct {
+		Phone string `json:"phone"`
 	}
- */
-	if err := c.BodyParser(&user); err != nil {
+	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	/*
-	if verifyCode(request.Phone, request.Code) {
-		user.Username = request.Username
-		user.Firstname = request.Firstname
-		user.Lastname = request.Lastname
-		user.Age = request.Age
-		user.Phone = request.Phone
-		user.Address = request.Address
-		user.Role = request.Role
-		user.Ava = request.Ava
-
-		if err := uh.userUsecase.CreateUser(&user); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-		}
-
-		return c.JSON(fiber.Map{
-			"message": "User registered successfully",
-		})
-	} else {
-		return c.JSON(fiber.Map{
-			"message": "User registered error",
-		})
+	if !phoneRe.MatchString(req.Phone) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid phone"})
 	}
-*/
-	
-	if err := uh.userUsecase.CreateUser(&user); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": err.Error()})
-		}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "successfully created user"})
 
+	code, err := uh.otp.Issue(c.Context(), req.Phone)
+	if errors.Is(err, otp.ErrTooManyRequests) {
+		return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{"error": err.Error()})
+	}
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	if err := uh.sender.Send(c.Context(), req.Phone, "Kod podtverzhdeniya: "+code); err != nil {
+		log.Printf("send sms to %s: %v", req.Phone, err)
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{"error": "failed to send sms"})
+	}
+
+	return c.JSON(fiber.Map{"message": "sms sent"})
+}
+
+func (uh *UsersHandler) Register(c *fiber.Ctx) error {
+	var req registerRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	if req.Username == "" || len(req.Password) < 8 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "username is required and password must be at least 8 characters"})
+	}
+
+	if uh.otp != nil {
+		ok, err := uh.otp.Verify(c.Context(), req.Phone, req.Code)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+		if !ok {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid or expired code"})
+		}
+	}
+
+	hash, err := uh.userService.HashPassword(req.Password)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	user := entity.User{
+		Username:  req.Username,
+		Firstname: req.Firstname,
+		Lastname:  req.Lastname,
+		Age:       req.Age,
+		Phone:     req.Phone,
+		Address:   req.Address,
+		Password:  hash,
+		Role:      "user",
+		Ava:       req.Ava,
+	}
+	if err := uh.userUsecase.CreateUser(&user); err != nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "successfully created user", "id": user.ID})
 }
 
 func (uh *UsersHandler) Login(c *fiber.Ctx) error {
-	var logins login
-
-	err := c.BodyParser(&logins)
-
-	if err != nil {
-		var eri = errorr{
-			status:  http.StatusBadRequest,
-			message: err.Error(),
-		}
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"data": eri})
+	var req login
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	user, err := uh.userUsecase.FindUserByUsername(logins.Username)
-
-	if err != nil {
-		var eri = errorr{
-			status:  http.StatusNotFound,
-			message: err.Error(),
-		}
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{"data": eri})
+	user, err := uh.userUsecase.FindUserByUsername(req.Username)
+	if err != nil || !uh.userService.CheckPassword(user.Password, req.Password) {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid username or password"})
 	}
 
-	//if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(logins.Password)); err != nil {
-	//	return c.Status(http.StatusBadRequest).JSON(fiber.Map{"Error": "Password doesnt exists"})
-	//}
-
-	if user.Password != logins.Password {
-		var eri = errorr{
-			status:  http.StatusBadRequest,
-			message: err.Error(),
-		}
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"data 2": eri})
-	}
 	accessToken, err := uh.userService.GenerateAccessToken(user)
 	if err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
-
 	refreshToken, err := uh.userService.GenerateRefreshToken(user)
 	if err != nil {
-		return err
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
 	return c.JSON(fiber.Map{
-
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 		"status":        user.Role,
@@ -209,28 +245,18 @@ func (uh *UsersHandler) Login(c *fiber.Ctx) error {
 
 func (uh *UsersHandler) AuthenticateToken(c *fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
-	if authHeader == "" {
+	if !strings.HasPrefix(authHeader, "Bearer ") {
 		return fiber.ErrUnauthorized
 	}
 
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	token, err := jwt.ParseWithClaims(tokenString, &entity.JWTCredentials{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return entity.SecretKey, nil
-	})
+	claims, err := uh.userService.ParseToken(strings.TrimPrefix(authHeader, "Bearer "))
 	if err != nil {
 		return fiber.ErrUnauthorized
 	}
 
-	if claims, ok := token.Claims.(*entity.JWTCredentials); ok && token.Valid {
-		c.Locals("role", claims.Role)
-
-		return c.Next()
-	}
-
-	return nil
+	c.Locals("user_id", claims.UserID)
+	c.Locals("role", claims.Role)
+	return c.Next()
 }
 
 func (uh *UsersHandler) AuthorizeRole(role string) fiber.Handler {
@@ -244,26 +270,22 @@ func (uh *UsersHandler) AuthorizeRole(role string) fiber.Handler {
 }
 
 func (uh *UsersHandler) GetUserProfile(c *fiber.Ctx) error {
-	authHeader := c.Get("Authorization")
-	if authHeader == "" {
+	id, ok := c.Locals("user_id").(uint)
+	if !ok {
 		return fiber.ErrUnauthorized
 	}
 
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	token, err := jwt.ParseWithClaims(tokenString, &entity.JWTCredentials{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return entity.SecretKey, nil
-	})
+	user, err := uh.userUsecase.GetUserByID(id)
 	if err != nil {
-		return fiber.ErrUnauthorized
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
 	}
+	return c.JSON(user)
+}
 
-	if claims, ok := token.Claims.(*entity.JWTCredentials); ok && token.Valid {
-
-		return c.JSON(fiber.Map{"claims": claims})
+func canAccessUser(c *fiber.Ctx, id uint) bool {
+	if c.Locals("role") == "admin" {
+		return true
 	}
-
-	return fiber.ErrUnauthorized
+	userID, ok := c.Locals("user_id").(uint)
+	return ok && userID == id
 }

@@ -3,6 +3,7 @@ module media-app
 go 1.21.1
 
 require (
+	github.com/alicebob/miniredis/v2 v2.33.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gofiber/fiber/v2 v2.52.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -10,7 +11,7 @@ require (
 	github.com/kolesa-team/go-webp v1.0.4
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/swag v1.16.3
-	golang.org/x/net v0.21.0
+	golang.org/x/crypto v0.24.0
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.7
 )

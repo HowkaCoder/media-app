@@ -14,16 +14,15 @@ type ProductUseCase interface {
 	GetProductsByCategoryID(id uint, language string) ([]entity.Product, error)
 	GetAllProducts(language string) ([]entity.Product, error)
 	GetProductsWithPagination(limit int, offset int) ([]entity.Product, error)
-	GetProductByFilter(discount []string , minPrice string , maxPrice string , subcategoryID []string , brand string) ([]entity.Product , error)
+	GetProductByFilter(discount []string, minPrice string, maxPrice string, subcategoryID []string, brand string) ([]entity.Product, error)
 	GetProductByID(id uint, language string) (*entity.Product, error)
 	CreateProduct(product *entity.Product) error
 	UpdateProduct(product *entity.Product, id uint) error
 	DeleteProduct(id uint) error
-	GetProductsSorterByThreeParams(name , price , discount string ) ([]entity.Product, error)
-  GetProductsByName(name string) ([]entity.Product , error)
+	GetProductsSorterByThreeParams(name, price, discount string) ([]entity.Product, error)
+	GetProductsByName(name string) ([]entity.Product, error)
 
-
-  // IMAGE - CRUD FUNCTIONS
+	// IMAGE - CRUD FUNCTIONS
 
 	CreateImage(image *entity.Image) error
 	GetImagesByProductID(product_id uint) ([]entity.Image, error)
@@ -89,16 +88,13 @@ func (pu *productUseCase) DeleteCharacteristic(id uint) error {
 
 // PRODUCT FUNCTIONS
 
-func (pu *productUseCase) GetProductByFilter(discount []string ,  minPrice string , maxPrice string , subcategoryID []string , brand string ) ([]entity.Product , error) { 
-	return pu.productRepo.GetProductsByFilter(discount, minPrice , maxPrice , subcategoryID , brand)
+func (pu *productUseCase) GetProductByFilter(discount []string, minPrice string, maxPrice string, subcategoryID []string, brand string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsByFilter(discount, minPrice, maxPrice, subcategoryID, brand)
 }
 
-
-
-func (pu *productUseCase) GetProductsSorterByThreeParams(name , price , discount string) ([]entity.Product , error ) {
-	return pu.productRepo.GetProductsSortedByThreeParams(name , price , discount)
+func (pu *productUseCase) GetProductsSorterByThreeParams(name, price, discount string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsSortedByThreeParams(name, price, discount)
 }
-
 
 func (pu *productUseCase) CreateProduct(product *entity.Product) error {
 	//pu.productService.ValidateProduct(product)
@@ -149,6 +145,6 @@ func (pu *productUseCase) GetProductsSortedByPriceAndCategory(sortOrder string, 
 	return pu.productRepo.GetProductsSortedByPriceAndCategory(sortOrder, categoryID, language)
 }
 
-func (pu *productUseCase) GetProductsByName(name string) ([]entity.Product ,error) {
-  return pu.productRepo.GetProductsByName(name)
+func (pu *productUseCase) GetProductsByName(name string) ([]entity.Product, error) {
+	return pu.productRepo.GetProductsByName(name)
 }

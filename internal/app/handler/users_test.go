@@ -81,7 +81,7 @@ func register(t *testing.T, app *fiber.App, username string) uint {
 	return uint(body["id"].(float64))
 }
 
-func login(t *testing.T, app *fiber.App, username, password string) (int, string) {
+func loginAs(t *testing.T, app *fiber.App, username, password string) (int, string) {
 	t.Helper()
 	status, body := doJSON(t, app, http.MethodPost, "/login", "", map[string]any{
 		"username": username,
@@ -95,15 +95,15 @@ func TestLogin(t *testing.T) {
 	app := setupUsersApp(t)
 	register(t, app, "ali")
 
-	status, token := login(t, app, "ali", "password123")
+	status, token := loginAs(t, app, "ali", "password123")
 	if status != http.StatusOK || token == "" {
 		t.Fatalf("login failed: %d", status)
 	}
 
-	if status, _ := login(t, app, "ali", "wrong-password"); status != http.StatusUnauthorized {
+	if status, _ := loginAs(t, app, "ali", "wrong-password"); status != http.StatusUnauthorized {
 		t.Fatalf("wrong password: expected 401, got %d", status)
 	}
-	if status, _ := login(t, app, "nobody", "password123"); status != http.StatusUnauthorized {
+	if status, _ := loginAs(t, app, "nobody", "password123"); status != http.StatusUnauthorized {
 		t.Fatalf("unknown user: expected 401, got %d", status)
 	}
 }
@@ -115,7 +115,7 @@ func TestRegisterAlwaysCreatesUserRole(t *testing.T) {
 		"password": "password123",
 		"role":     "admin",
 	})
-	_, token := login(t, app, "hacker", "password123")
+	_, token := loginAs(t, app, "hacker", "password123")
 
 	if status, _ := doJSON(t, app, http.MethodGet, "/api/users", token, nil); status != http.StatusForbidden {
 		t.Fatalf("expected 403 for admin route, got %d", status)
@@ -125,7 +125,7 @@ func TestRegisterAlwaysCreatesUserRole(t *testing.T) {
 func TestPasswordIsNotReturned(t *testing.T) {
 	app := setupUsersApp(t)
 	register(t, app, "ali")
-	_, token := login(t, app, "ali", "password123")
+	_, token := loginAs(t, app, "ali", "password123")
 
 	status, body := doJSON(t, app, http.MethodGet, "/api/users-profile", token, nil)
 	if status != http.StatusOK {
@@ -140,7 +140,7 @@ func TestUserCannotUpdateOtherUser(t *testing.T) {
 	app := setupUsersApp(t)
 	aliID := register(t, app, "ali")
 	otherID := register(t, app, "bobur")
-	_, token := login(t, app, "ali", "password123")
+	_, token := loginAs(t, app, "ali", "password123")
 
 	path := fmt.Sprintf("/api/users/%d", otherID)
 	if status, _ := doJSON(t, app, http.MethodPatch, path, token, map[string]any{"firstname": "X"}); status != http.StatusForbidden {

@@ -1,99 +1,67 @@
 package internal
 
 import (
-	"log"
+	"fmt"
 	"media-app/internal/app/entity"
+	"os"
+	"path/filepath"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
+const idOffset = 12345678
 
-func Init() *gorm.DB {
-	var err error
-	// dsn := "root:REDACTED@tcp(viaduct.proxy.rlwy.net:38909)/railway?charset=utf8mb4&parseTime=True&loc=Local"
-	// DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
-	DB, err := gorm.Open(sqlite.Open("database/database.db"), &gorm.Config{})
-	if err != nil {
-		log.Fatal(err)
+func Init(path string) (*gorm.DB, error) {
+	if dir := filepath.Dir(path); dir != "." {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return nil, err
+		}
 	}
 
-	err = DB.AutoMigrate(&entity.Image{})
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
 	if err != nil {
-		log.Fatal(err)
-	}
-	err = DB.AutoMigrate(&entity.OrderProduct{})
-	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	err = DB.AutoMigrate(&entity.Characteristic{})
+	err = db.AutoMigrate(
+		&entity.Image{},
+		&entity.OrderProduct{},
+		&entity.Characteristic{},
+		&entity.Product{},
+		&entity.Language{},
+		&entity.ProductTranslations{},
+		&entity.CharacteristicTranslation{},
+		&entity.User{},
+		&entity.Metric{},
+		&entity.SubCategory{},
+		&entity.MainCategory{},
+		&entity.Order{},
+	)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("migrate: %w", err)
 	}
 
-	err = DB.AutoMigrate(&entity.Product{})
-	if err != nil {
-		log.Fatal(err)
+	for _, table := range []string{"products", "main_categories", "sub_categories", "users"} {
+		if err := startIDsFrom(db, table, idOffset); err != nil {
+			return nil, fmt.Errorf("set sequence for %s: %w", table, err)
+		}
 	}
 
-	err = DB.AutoMigrate(&entity.Language{})
-	if err != nil {
-		log.Fatal(err)
+	return db, nil
+}
+
+func startIDsFrom(db *gorm.DB, table string, start int) error {
+	if !db.Migrator().HasTable("sqlite_sequence") {
+		return nil
 	}
 
-	err = DB.AutoMigrate(&entity.ProductTranslations{})
-	if err != nil {
-		log.Fatal(err)
+	var count int64
+	if err := db.Table("sqlite_sequence").Where("name = ?", table).Count(&count).Error; err != nil {
+		return err
 	}
-
-	err = DB.AutoMigrate(&entity.CharacteristicTranslation{})
-	if err != nil {
-		log.Fatal(err)
+	if count > 0 {
+		return nil
 	}
-
-	err = DB.AutoMigrate(&entity.User{}, &entity.Metric{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = DB.AutoMigrate(&entity.JWTCredentials{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = DB.AutoMigrate(&entity.SubCategory{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = DB.AutoMigrate(&entity.MainCategory{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = DB.AutoMigrate(&entity.Order{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	DB.Exec("DELETE FROM sqlite_sequence WHERE name='products'")
-	DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('products', 12345678)")
-
-	DB.Exec("DELETE FROM sqlite_sequence WHERE name='main_categories'")
-	DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('main_categories, 12345678)")
-
-	mn := entity.MainCategory{ID: 12345678, Name: "32432d2d23d23"}
-	DB.Create(&mn)
-	DB.Delete(&mn)
-
-	DB.Exec("DELETE FROM sqlite_sequence WHERE name='sub_categories'")
-	DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('sub_categories', 12345678)")
-
-	DB.Exec("DELETE FROM sqlite_sequence WHERE name='users'")
-	DB.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES ('users', 12345678)")
-
-	return DB
+	return db.Exec("INSERT INTO sqlite_sequence (name, seq) VALUES (?, ?)", table, start).Error
 }

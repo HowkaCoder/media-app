@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+*.db
+*.log
+.env
+token.txt
+/main
+/media-app
+images/*
+!images/.gitkeep

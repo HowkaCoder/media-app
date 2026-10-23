@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"media-app/internal/app/entity"
 )
@@ -42,37 +41,39 @@ func (or *orderRepository) GetOrderByID(id uint) (*entity.Order, error) {
 	return &order, nil
 }
 
+var ErrOutOfStock = errors.New("not enough products in stock")
+
 func (or *orderRepository) CreateOrder(order *entity.Order) error {
-    for i, value := range order.Products {
-        productID := value.ProductID
-        var product entity.Product
-        if err := or.db.First(&product, productID).Error; err != nil {
-            return err
-        }
+	return or.db.Transaction(func(tx *gorm.DB) error {
+		for i, item := range order.Products {
+			count := item.Count
+			if count == 0 {
+				count = 1
+				order.Products[i].Count = 1
+			}
 
+			res := tx.Model(&entity.Product{}).
+				Where("id = ? AND quantity >= ?", item.ProductID, count).
+				UpdateColumn("quantity", gorm.Expr("quantity - ?", count))
+			if res.Error != nil {
+				return res.Error
+			}
+			if res.RowsAffected == 0 {
+				return ErrOutOfStock
+			}
 
+			var product entity.Product
+			if err := tx.First(&product, item.ProductID).Error; err != nil {
+				return err
+			}
+			order.Products[i].Description = product.Description
+			order.Products[i].Title = product.Name
+			order.Products[i].Price = product.Price
+			order.Products[i].Discount = product.Discount
+		}
 
-        if product.Quantity != 0 {
-          product.Quantity = product.Quantity - 1
-        }
-
-        // Обновляем поля order.Products[i]
-        order.Products[i].Description  = product.Description   
-        order.Products[i].Title = product.Name
-        order.Products[i].Price = product.Price
-        order.Products[i].Discount = product.Discount
-        
-        if err := or.db.Save(&product).Error; err != nil {
-          return err
-        }
-
-
-	fmt.Println(order.Products[i])
-    }
-
-	fmt.Println(order)
-    // Сохраняем заказ вместе с обновленными продуктами
-    return or.db.Create(&order).Error
+		return tx.Create(order).Error
+	})
 }
 
 func (or *orderRepository) UpdateOrder(order *entity.Order, id uint) error {
